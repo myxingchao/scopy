@@ -17,6 +17,10 @@ install:
     # Install Inno Setup
     - choco install InnoSetup
 
+    # Remove the Python stuff that we don't need
+    - C:\msys64\usr\bin\bash -lc "find /mingw64/lib/python3.5 -type d -name __pycache__ -exec rm -rf {} + ;"
+    - C:\msys64\usr\bin\bash -lc "cd /mingw64/lib/python3.5 ; rm -rf config-3.5m test"
+
 build_script:
     - set PATH=C:\msys64\mingw64\bin;%PATH%
     - C:\msys64\usr\bin\bash -lc "mkdir /c/build ; cd /c/build ; cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DGIT_EXECUTABLE=/c/Program\\ Files/Git/cmd/git.exe -DPKG_CONFIG_EXECUTABLE=/mingw64/bin/pkg-config.exe -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc.exe -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++.exe /c/projects/scopy && ninja"
