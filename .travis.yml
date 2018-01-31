@@ -1,6 +1,20 @@
 language: cpp
 sudo: required
 
+env:
+  global:
+  # SSHHOST
+  - secure: "P5+9462d4vwFEAm5e8vcS2RTBXys8OXWyeJ/iPW/aPdarMrzq0AqrB6YWdW0lhn9FW4sOha9OaoH3rkpqUAsr8UPfbUDFjLYkFEPKLCrh5LAOL7QIuFFoE0h9yozz+Wh9FNYhy1ke3biQAgzpZAMZnpydHnrWYsybNCUjgby0/uMea1UOtt0BVGPaiMR/sUzhuPunAbCRsCxxGuBXAqJFN0RsyxKRSj4cdYKcecvwYMDskT1VOU2d0WOYRGmLixGJHyli+VMvxwiLwGsM7W0TSfVOuN0ceiE0/eo00yDyWNLG3mUHZ+yVby0Kduhioy6t6vRD8Pq6gb+ryw2v53iVr4F4ucwsuWchaIvPE1y/obLEaAox7MoeyXvbTMgMn4vAWmUOZ5as4w6WGYcmpUfAEmPn99pX0g0OgjJ0Ph2OaG1BRV2G+nXugelgYPz3cHgWYADBIcJoQe2P9jiHxixnciKTuxbQjbjtbQGmzC2BzS1YIIKxwbRuquXz9zZdUusBpxCfsBy7Y7P6Vhl5UkOpZc3uzjueS9UzUlA4HakrWXg0783PXQRmtSO2NBTvAJVgnN40YQYvVsm/a8N+TByx9MQMhYKCKsGc1YaHUX2rCXVR63TnJ70tWjOo8yaPebQZGub4k7cXxtmhfLiSuZ/v93fqodebLLnAj7CLPC12X0="
+  # SSHUSER
+  - secure: "jnh76+wnhj6DU9QWa3k29ic44PBR3CoRRDhgqA9kzrgSQQkWbBdS/ImzKl1qG0kmNBiuIJ4RS508VY/A2wFkB461/CLXZ7I/iPyxEwWhVePDHTzmGA8Xqn4cdG6els1tk2tHJzWRRJ3/AqznnZaKQasDhotaeTAqKri6Y7dS/73rTvr25FNGhcu9tvi/vYfxqMc18ItJFoiV34r+bAfIDv9F/rpQTONtk//P1uspH4Fp1x/3PfWNESNWV4GGw9QQMPrE4kgNsZQi+qZUBNEwBPf2+JVrZZmUvV2UoGouw2ukuL3qCyJYvIMWjjO3rSLWvaY7jBrEcAV9M6MQDS2jrOh3FF0eJ8TseojKmEYIri1A3y3EO6Y5Z34b91UY1tyao00zhgpVEpT+j7vCr/sO6BRaw9YNvH/l4EuWw+lNaaFC0jPKpXs7mXLt2b7Q7+NI6Z0R0TxJCg825t4wTnFlRgG3UItvpjj5tFNlDGHmk5c2TDPY6ilLPmX65CkHzirGdkGysVMNNOjjhFpICrloOk7yMUIG9iXZVMYGx+aL3nvQi+iOtx9FCmc44UXtNkXeHQ48qHgyUhE60NgC1jChGFNUz1K78EqQceZjS2nxdm4u66Nyw2iwlEHfhbayU6gYKNsoSPg3/uNqFCw/tZM8ieqlptf7fCWE+RDNBcxWiYo="
+  # DEPLOY_TO directory
+  - secure: "vpQ6a7kn6GK8PLDHNlekJ6h/pNIS5sZ77Zlw9eEXy5/XJ4NsITTNgeotngH4CLH0zbiviSSCgiOwi+H8AJuSpN81I+theAwmeSWk60xyeU6Uz9cf7jdVMlk6UaU/kgAfWZts006wDthyL0CHCBBCJCqpJIaD+Ot/j3XK3nU/2IIMwrE+AcAmVdcBCDMC94aC07ZEFMuIvglH6nwakNCnvD9c9bxR7TFdh2PTHCPcMxm1+Qbfu/97kxuWXcQOUAAY9WZ3knAeQC14BU+hiwp3IoIrTGb2ZKB0GOUagpMf0laNrnFEejzlG5KbwB6c1iW3+VBZh2rQWx1ex5DOgfGjQcVUIPAL3DPKKNUIUdKzCbgF+YG9SuOj1jjqGes3vHIcjIMLu8BsDtSymmJ7o3bUnnvtAQ5mveIGxsTFdJCyk4a3tSbF1INQfkr1uNRjP9s8qKkVGQr8KMAC1PCWtnOWDtewz9BNmLFPoA67JfuMlD9pzCvnJ+4C01UE+eoe4MHquuW/T2YAOl70jrtFCUOGBdCG5+PnoO6twMxAdJ8sRoriVyOKf4N65Ek8oT/RoJPkKGzuq5Lrbo8luB6cAuQIrhwTVbNxGGK3MY/Z4S4tfubuge7uwoh555mhBOO5KndBKaAsN4LzfH/7hsBZrM5yGjx3PXVdRnFGrkUpglkyPpk="
+  - BRANCH_PULL=$TRAVIS_PULL_REQUEST_BRANCH
+  - PULL=$TRAVIS_PULL_REQUEST
+  - BRANCH=$TRAVIS_BRANCH
+
+
+
 cache:
   ccache: true
   directories:
@@ -20,7 +34,9 @@ matrix:
     - compiler: clang
       os: osx
       osx_image: xcode8.3
-      env: LDIST=-osx_10.12
+      env:
+        - LDIST=-osx_10.12
+        - EXTRA_SSH=-oHostKeyAlgorithms=+ssh-dss
     - compiler: gcc
       os: linux
       dist: trusty
@@ -46,4 +62,21 @@ notifications:
     on_failure: always
 
 before_deploy:
-  - . ${TRAVIS_BUILD_DIR}/CI/travis/before_deploy.sh
+  - echo "before deploy"
+  - cd ${TRAVIS_BUILD_DIR}
+  - ./CI/travis/before_deploy.sh
+  - openssl aes-256-cbc -K $encrypted_17f1034b5861_key -iv $encrypted_17f1034b5861_iv -in ${TRAVIS_BUILD_DIR}/CI/travis/deploy.rsa.enc -out /tmp/deploy.rsa -d
+  - eval "$(ssh-agent -s)"
+  - chmod 600 /tmp/deploy.rsa
+  - ssh-add /tmp/deploy.rsa
+
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script:
+      - ${TRAVIS_BUILD_DIR}/CI/travis/deploy.sh
+    on:
+      condition: "$TRAVIS_OS_NAME = osx"
+      all_branches: true
+
+

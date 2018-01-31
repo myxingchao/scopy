@@ -40,5 +40,5 @@ sudo python /tmp/macdeployqtfix.py ./Scopy.app/Contents/MacOS/Scopy /usr/local/o
 sudo python /tmp/macdeployqtfix.py ./Scopy.app/Contents/MacOS/Scopy ./Scopy.app/Contents/Frameworks/
 
 sudo /usr/local/opt/qt/bin/macdeployqt Scopy.app -dmg
-cp Scopy.dmg ${TRAVIS_BUILD_DIR}/scopy_latest${LDIST}.dmg
-curl --upload-file ${TRAVIS_BUILD_DIR}/scopy_latest${LDIST}.dmg https://transfer.sh/scopy_latest${LDIST}.dmg
+cp Scopy.dmg ${TRAVIS_BUILD_DIR}/build/scopy_latest.dmg
+#curl --upload-file ${TRAVIS_BUILD_DIR}/scopy_latest${LDIST}.dmg https://transfer.sh/scopy_latest${LDIST}.dmg

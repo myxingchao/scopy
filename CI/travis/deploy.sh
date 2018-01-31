@@ -7,17 +7,10 @@ send()
 if [ "$#" -ne 3 ] ; then
 	echo "skipping deployment of something"
         echo "send called with $@"
-	return
 fi
 
 if [ "x$1" = "x" ] ; then
 	echo no file to send
-	return
-fi
-
-if [ ! -r "$1" ] ; then
-	echo "file $1 is not readable"
-	ls -l $1
 	return
 fi
 
@@ -63,4 +56,6 @@ fi
 }
 
 #    from                   to             suffix
+echo ${RELEASE_PKG_FILE_DMG}
+echo ${TARGET_DMG}
 send ${RELEASE_PKG_FILE_DMG} ${TARGET_DMG} .dmg
