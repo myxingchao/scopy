@@ -259,6 +259,19 @@ target_link_libraries(${PROJECT_NAME} LINK_PRIVATE
 		${GLIB_LIBRARIES}
 )
 
+if (ENABLE_STATIC_LINKING)
+       target_link_libraries(${PROJECT_NAME} LINK_PRIVATE
+		rt
+		usb-1.0
+		avahi-client
+		avahi-common
+	        xml2
+		boost_program_options
+		fftw3
+		fftw3f
+		fftw3f_threads)
+endif()
+
 if (NOT WIN32)
 	find_library(PTHREAD_LIBRARIES pthread)
 	if (PTHREAD_LIBRARIES)

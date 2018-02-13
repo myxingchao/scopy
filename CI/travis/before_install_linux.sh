@@ -4,7 +4,7 @@ sudo add-apt-repository --yes ppa:jonathonf/python-3.6
 sudo add-apt-repository --yes ppa:beineri/opt-qt592-trusty
 sudo apt-get -qq update
 sudo apt-get install -y git cmake libzip-dev libusb-1.0-0-dev autoconf libtool libxml2 libxml2-dev python3.6 python-dev python3.6-dev libfftw3-dev libffi-dev
-sudo apt-get install -y libmount-dev libpcre3-dev libglib2.0-dev libsigc++-2.0-dev libglibmm-2.4-dev doxygen libglu1-mesa-dev curl flex bison libmatio2 libmatio-dev
+sudo apt-get install -y libmount-dev libpcre3-dev libglib2.0-dev libsigc++-2.0-dev libglibmm-2.4-dev doxygen libglu1-mesa-dev curl flex bison libmatio2 libmatio-dev libavahi-client-dev libavahi-common-dev
 sudo apt-get install -y --force-yes qt59base qt59declarative qt59quickcontrols qt59svg qt59tools
 
 source /opt/qt59/bin/qt59-env.sh && qmllint client/qml/*.qml
@@ -16,9 +16,14 @@ sudo ln -s /usr/bin/python3.6m /usr/bin/python3m
 sudo ln -s /usr/bin/python3.6m-config /usr/bin/python3m-config
 sudo sed -i "s/4/6/g" /usr/lib/x86_64-linux-gnu/pkgconfig/python3.pc
 
-mkdir -p deps
-cd deps
+mkdir -p ${TRAVIS_BUILD_DIR}/deps
+cd ${TRAVIS_BUILD_DIR}/deps
 WORKDIR=$PWD
+cd ..
+mkdir -p ${TRAVIS_BUILD_DIR}/static-deps/usr
+cd ${TRAVIS_BUILD_DIR}/static-deps/usr
+INSTALLED_DEPS=$PWD
+echo $INSTALLED_DEPS
 
 cd ${WORKDIR}
 rm boost_1_63_0.tar.gz*
@@ -27,11 +32,11 @@ if [ ! -d boost_1_63_0 ]; then
   tar -xzf boost_1_63_0.tar.gz
   cd boost_1_63_0
   ./bootstrap.sh --with-libraries=date_time,filesystem,program_options,regex,system,test,thread >/dev/null
-  ./b2 >/dev/null
+  ./b2 link=static --prefix=${INSTALLED_DEPS} >/dev/null
 else
   cd boost_1_63_0
 fi
-sudo ./b2 install >/dev/null
+sudo ./b2 link=static --prefix=${INSTALLED_DEPS} install >/dev/null
 
 cd ${WORKDIR}
 rm Markdown-2.6.8.tar.gz*
@@ -64,12 +69,15 @@ if [ ! -d volk-1.3 ]; then
   tar -xzf volk-1.3.tar.gz
   cd volk-1.3
   mkdir build && cd build
-  cmake ..
+  cmake -DENABLE_STATIC_LIBS=ON -DCMAKE_FIND_LIBRARY_SUFFIXES=".a" -DCMAKE_PREFIX_PATH=${INSTALLED_DEPS} -DCMAKE_INSTALL_PREFIX=${INSTALLED_DEPS} -DENABLE_PROFILING=OFF -DENABLE_TESTING=OFF ..
   make
 else
   cd volk-1.3/build
 fi
 sudo make install
+
+cd ${WORKDIR}/boost_1_63_0
+sudo ./b2 --prefix=${INSTALLED_DEPS} install >/dev/null
 
 cd ${WORKDIR}
 if [ ! -d gnuradio ]; then
@@ -82,7 +90,7 @@ else
   git pull
   cd build
 fi
-cmake -DENABLE_INTERNAL_VOLK:BOOL=OFF -DENABLE_GR_FEC:BOOL=OFF -DENABLE_GR_DIGITAL:BOOL=OFF -DENABLE_GR_DTV:BOOL=OFF -DENABLE_GR_ATSC:BOOL=OFF -DENABLE_GR_AUDIO:BOOL=OFF -DENABLE_GR_CHANNELS:BOOL=OFF -DENABLE_GR_NOAA:BOOL=OFF -DENABLE_GR_PAGER:BOOL=OFF -DENABLE_GR_TRELLIS:BOOL=OFF -DENABLE_GR_VOCODER:BOOL=OFF ..
+cmake -DCMAKE_INSTALL_PREFIX=${INSTALLED_DEPS} -DCMAKE_PREFIX_PATH=${INSTALLED_DEPS} -DENABLE_STATIC_LIBS=ON -DENABLE_INTERNAL_VOLK:​BOOL=OFF -DENABLE_GR_FEC:BOOL=OFF -DENABLE_GR_DIGITAL:BOOL=OFF -DENABLE_GR_DTV:BOOL=OFF -DENABLE_GR_ATSC:BOOL=OFF -DENABLE_GR_AUDIO:BOOL=OFF -DENABLE_GR_CHANNELS:BOOL=OFF -DENABLE_GR_NOAA:BOOL=OFF -DENABLE_GR_PAGER:​BOOL=OFF -DENABLE_GR_TRELLIS:​BOOL=OFF -DENABLE_GR_VOCODER:​BOOL=OFF ..
 make
 sudo make install >/dev/null
 
@@ -116,6 +124,8 @@ if [ ! -d qwt ]; then
   git clone https://github.com/osakared/qwt.git -b qwt-6.1-multiaxes
   cd qwt
   curl https://raw.githubusercontent.com/analogdevicesinc/scopy/osx/qwt-6.1-multiaxes.patch |patch -p1 --forward
+  sed -i "s|^\\s*QWT_INSTALL_PREFIX.*$|QWT_INSTALL_PREFIX=$INSTALLED_DEPS|g" qwtconfig.pri
+  sed -i "/^QWT_CONFIG\\s*+=\\s*QwtDll$/s/^/#/g" qwtconfig.pri
   /opt/qt59/bin/qmake qwt.pro
   make
 else
@@ -135,23 +145,26 @@ if [ ! -d qwtpolar-1.1.1 ]; then
   # Disable components that we won't build
   sed -i "/^QWT_POLAR_CONFIG\\s*+=\\s*QwtPolarExamples$/s/^/#/g" qwtpolarconfig.pri
   sed -i "/^QWT_POLAR_CONFIG\\s*+=\\s*QwtPolarDesigner$/s/^/#/g" qwtpolarconfig.pri
+  sed -i "/^QWT_POLAR_CONFIG\\s*+=\\s*QwtPolarDll$/s/^/#/g" qwtpolarconfig.pri
   # Fix prefix
-  sed -i "s/^\\s*QWT_POLAR_INSTALL_PREFIX.*$/QWT_POLAR_INSTALL_PREFIX=\/usr\/local/g" qwtpolarconfig.pri
+  sed -i "s|^\\s*QWT_POLAR_INSTALL_PREFIX.*$|QWT_POLAR_INSTALL_PREFIX=$INSTALLED_DEPS|g" qwtpolarconfig.pri
   sed -i "/^QWT_POLAR_INSTALL_HEADERS/s/$/\/qwt/g" qwtpolarconfig.pri
   cat qwtpolarconfig.pri | grep QWT_POLAR_INSTALL_PREFIX
-  /opt/qt59/bin/qmake LIBS+="-L/usr/local/lib -lqwt" INCLUDEPATH+="/usr/local/include/qwt" qwtpolar.pro
+  /opt/qt59/bin/qmake LIBS+="-L${INSTALLED_DEPS}/lib -lqwt" INCLUDEPATH+="${INSTALLED_DEPS}/include/qwt" qwtpolar.pro
   make
 else
   cd qwtpolar-1.1.1
 fi
 sudo make install
 
+sudo rm ${INSTALLED_DEPS}/lib/*.so*
+
 cd ${WORKDIR}
 if [ ! -d libiio ]; then
   git clone https://github.com/analogdevicesinc/libiio
   cd libiio && mkdir build
   cd build
-  cmake -DCMAKE_INSTALL_LIBDIR:STRING=lib -DINSTALL_UDEV_RULE:BOOL=OFF -DPYTHON_BINDINGS:BOOL=OFF -DCSHARP_BINDINGS:BOOL=OFF -DWITH_TESTS:BOOL=OFF -DWITH_DOC:BOOL=OFF -DWITH_IIOD:BOOL=OFF -DWITH_LOCAL_BACKEND:BOOL=OFF -DWITH_MATLAB_BINDINGS_API:BOOL=OFF ..
+  cmake -DCMAKE_INSTALL_LIBDIR:STRING=lib -DINSTALL_UDEV_RULE:BOOL=OFF -DPYTHON_BINDINGS:BOOL=OFF -DCSHARP_BINDINGS:BOOL=OFF -DWITH_TESTS:BOOL=OFF -DWITH_DOC:BOOL=OFF -DWITH_IIOD:BOOL=OFF -DWITH_LOCAL_BACKEND:BOOL=OFF -DWITH_MATLAB_BINDINGS_API:BOOL=OFF -DCMAKE_INSTALL_PREFIX=${INSTALLED_DEPS} -DBUILD_SHARED_LIBS=OFF ..
   make
 else
   cd libiio
@@ -166,7 +179,7 @@ if [ ! -d libad9361-iio ]; then
   cd libad9361-iio
   mkdir build
   cd build
-  cmake ..
+  cmake -DCMAKE_PREFIX_PATH=${INSTALLED_DEPS} -DCMAKE_INSTALL_PREFIX=${INSTALLED_DEPS} -DBUILD_SHARED_LIBS=OFF ..
   make
 else
   cd libad9361-iio
@@ -176,12 +189,13 @@ fi
 sudo make install
 
 cd ${WORKDIR}
+rm -rf gr-iio
 if [ ! -d gr-iio ]; then
-  git clone https://github.com/analogdevicesinc/gr-iio
+  git clone https://github.com/analogdevicesinc/gr-iio -b static-libs
   cd gr-iio
   mkdir build
   cd build
-  cmake ..
+  cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_PREFIX_PATH=${INSTALLED_DEPS} -DCMAKE_INSTALL_PREFIX=${INSTALLED_DEPS} ..
   make
 else
   cd gr-iio
@@ -189,3 +203,11 @@ else
   cd build
 fi
 sudo make install
+
+ls ${INSTALLED_DEPS}/lib
+sudo mkdir -p /opt/scopy
+sudo cp -R /opt/qt59/* /opt/scopy
+sudo cp /usr/local/libsigrok.so* /opt/scopy/lib
+sudo cp /usr/local/libsigrokcxx.so* /opt/scopy/lib
+sudo cp /usr/local/libsigrokdecode.so* /opt/scopy/lib
+echo $INSTALLED_DEPS
