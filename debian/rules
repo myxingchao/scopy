@@ -1,0 +1,24 @@
+#!/usr/bin/make -f
+export QT_SELECT=5
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+export LD_LIBRARY_PATH := $(shell pwd)/debian/scopy/opt/scopy/lib:$(LD_LIBRARY_PATH)
+
+%:
+	dh $@ --parallel
+
+override_dh_auto_configure:
+	pwd
+	echo "Running cmake"
+
+override_dh_auto_build:
+	echo "Building"
+
+override_dh_auto_install:
+	mkdir -p debian/scopy/opt/scopy/bin
+	mkdir -p debian/scopy/opt/scopy/lib
+	chmod +x debian/build.sh
+	./debian/build.sh
+
+override_dh_shlibdeps:
+	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info
+

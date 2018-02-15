@@ -4,7 +4,7 @@ sudo add-apt-repository --yes ppa:jonathonf/python-3.6
 sudo add-apt-repository --yes ppa:beineri/opt-qt592-trusty
 sudo apt-get -qq update
 sudo apt-get install -y git cmake libzip-dev libusb-1.0-0-dev autoconf libtool libxml2 libxml2-dev python3.6 python-dev python3.6-dev libfftw3-dev libffi-dev
-sudo apt-get install -y libmount-dev libpcre3-dev libglib2.0-dev libsigc++-2.0-dev libglibmm-2.4-dev doxygen libglu1-mesa-dev curl flex bison libmatio2 libmatio-dev libavahi-client-dev libavahi-common-dev
+sudo apt-get install -y libmount-dev libpcre3-dev libglib2.0-dev libsigc++-2.0-dev libglibmm-2.4-dev doxygen libglu1-mesa-dev curl flex bison libmatio2 libmatio-dev libavahi-client-dev libavahi-common-dev devscripts
 sudo apt-get install -y --force-yes qt59base qt59declarative qt59quickcontrols qt59svg qt59tools
 
 source /opt/qt59/bin/qt59-env.sh && qmllint client/qml/*.qml
@@ -16,12 +16,12 @@ sudo ln -s /usr/bin/python3.6m /usr/bin/python3m
 sudo ln -s /usr/bin/python3.6m-config /usr/bin/python3m-config
 sudo sed -i "s/4/6/g" /usr/lib/x86_64-linux-gnu/pkgconfig/python3.pc
 
-mkdir -p ${TRAVIS_BUILD_DIR}/deps
-cd ${TRAVIS_BUILD_DIR}/deps
+mkdir -p ${TRAVIS_BUILD_DIR}/../deps
+cd ${TRAVIS_BUILD_DIR}/../deps
 WORKDIR=$PWD
 cd ..
-mkdir -p ${TRAVIS_BUILD_DIR}/static-deps/usr
-cd ${TRAVIS_BUILD_DIR}/static-deps/usr
+mkdir -p ${TRAVIS_BUILD_DIR}/../static-deps/usr
+cd ${TRAVIS_BUILD_DIR}/../static-deps/usr
 INSTALLED_DEPS=$PWD
 echo $INSTALLED_DEPS
 
@@ -207,7 +207,6 @@ sudo make install
 ls ${INSTALLED_DEPS}/lib
 sudo mkdir -p /opt/scopy
 sudo cp -R /opt/qt59/* /opt/scopy
-sudo cp /usr/local/libsigrok.so* /opt/scopy/lib
-sudo cp /usr/local/libsigrokcxx.so* /opt/scopy/lib
-sudo cp /usr/local/libsigrokdecode.so* /opt/scopy/lib
+sudo cp /usr/local/lib/libsigrok*.so* /opt/scopy/lib
+#sudo rm /usr/local/lib/libsigrok*.so*
 echo $INSTALLED_DEPS

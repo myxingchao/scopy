@@ -1,0 +1,12 @@
+Source: scopy
+Maintainer: Alexandra Trifan <Alexandra.Trifan@analog.com>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9)
+
+Package: scopy
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: A software oscilloscope
+

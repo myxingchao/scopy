@@ -1,0 +1,8 @@
+libfftw3-dev (>=3.0)
+libaio-dev (>= 0.3.109)
+libavahi-client-dev (>= 0.6.31)
+libavahi-common-dev (>= 0.6.31)
+libusb-1.0-0-dev (>= 2:1.0.17)
+libxml2-dev (>= 2.9.1)
+libmatio-dev (>=1.0.0)
+libicu-dev (>= 50.0)
