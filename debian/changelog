@@ -1,5 +1,5 @@
-scopy (1.0-1) UNRELEASED; urgency=medium
+scopy (1.0) UNRELEASED; urgency=low
 
-  * Initial release. (Closes: #XXXXXX)
+  * Initial release.
 
-
+ -- Alexandra Trifan <Alexandra.Trifan@analog.com>  Wed, 21 Feb 2018 15:29:15 +0200
