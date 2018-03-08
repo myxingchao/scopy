@@ -80,6 +80,9 @@ namespace adiscope {
 		MouseWheelWidgetGuard *wheelEventGuard;
 
 		std::vector<double> m_min, m_max;
+		std::vector<bool> highGain;
+		std::vector<double> previousSample;
+		double gain_threshold;
 
 		void disconnectAll();
 		gr::basic_block_sptr configureGraph(gr::basic_block_sptr s2f,
@@ -114,6 +117,7 @@ namespace adiscope {
 
 		void collapsePeakHold(bool);
 		void collapseDataLog(bool);
+		void toggleGainMode(int, bool);
 	};
 
 	class DMM_API : public ApiObject

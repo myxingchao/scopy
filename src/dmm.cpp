@@ -54,7 +54,8 @@ DMM::DMM(struct iio_context *ctx, Filter *filt, std::shared_ptr<GenericAdc> adc,
 	interrupt_data_logging(false),
 	filename(""),
 	use_timer(false),
-	logging_refresh_rate(0)
+	logging_refresh_rate(0),
+	gain_threshold(2)
 {
 	ui->setupUi(this);
 
@@ -77,6 +78,8 @@ DMM::DMM(struct iio_context *ctx, Filter *filt, std::shared_ptr<GenericAdc> adc,
 	{
 		m_min.push_back(0);
 		m_max.push_back(0);
+		highGain.push_back(false);
+		previousSample.push_back(0.0);
 	}
 
 	connect(ui->run_button, SIGNAL(toggled(bool)),
@@ -213,6 +216,23 @@ void DMM::updateValuesList(std::vector<float> values)
 
 	checkPeakValues(0, volts_ch1);
 	checkPeakValues(1, volts_ch2);
+
+	if (previousSample.at(0) <= gain_threshold
+			&& volts_ch1 <= gain_threshold) {
+		toggleGainMode(0, true);
+	} else if (previousSample.at(0) > gain_threshold
+		   && volts_ch1 > gain_threshold) {
+		toggleGainMode(0, false);
+	}
+	if (previousSample.at(1) <= gain_threshold
+			&& volts_ch2 <= gain_threshold) {
+		toggleGainMode(1, true);
+	} else if (previousSample.at(1) > gain_threshold
+		   && volts_ch2 > gain_threshold) {
+		toggleGainMode(1, false);
+	}
+	previousSample[0] = volts_ch1;
+	previousSample[1] = volts_ch2;
 
 	if(!use_timer)
 		data_cond.notify_all();
@@ -575,6 +595,32 @@ void DMM::toggleAC()
 	}
 }
 
+void DMM::toggleGainMode(int i, bool high)
+{
+	if ((high && highGain.at(i)) || (!high && !highGain.at(i))) {
+		return;
+	}
+
+	bool started = manager->started();
+	if (started) {
+		toggleTimer(false);
+	}
+
+	auto m2k_adc = std::dynamic_pointer_cast<M2kAdc>(adc);
+	if (m2k_adc) {
+		if (high) {
+			m2k_adc->setChnHwGainMode(i, M2kAdc::HIGH_GAIN_MODE);
+		} else {
+			m2k_adc->setChnHwGainMode(i, M2kAdc::LOW_GAIN_MODE);
+		}
+	}
+	highGain[i] = high;
+
+	if (started) {
+		toggleTimer(true);
+	}
+}
+
 int DMM::numSamplesFromIdx(int idx)
 {
 	switch(idx) {
@@ -611,7 +657,11 @@ void DMM::writeAllSettingsToHardware()
 	if (m2k_adc) {
 		for (uint i = 0; i < adc->numAdcChannels(); i++) {
 			m2k_adc->setChnHwOffset(i, 0.0);
-			m2k_adc->setChnHwGainMode(i, M2kAdc::LOW_GAIN_MODE);
+			if (highGain.at(i)) {
+				m2k_adc->setChnHwGainMode(i, M2kAdc::HIGH_GAIN_MODE);
+			} else {
+				m2k_adc->setChnHwGainMode(i, M2kAdc::LOW_GAIN_MODE);
+			}
 		}
 
 		iio_device_attr_write_longlong(adc->iio_adc_dev(),
