@@ -24,7 +24,8 @@ color: black;</string>
       <widget class="QLabel" name="label">
        <property name="styleSheet">
         <string notr="true">font: 75 10pt &quot;DejaVu Sans&quot;;
-font-weight: bold;</string>
+font-weight: bold;
+color:white</string>
        </property>
        <property name="text">
         <string>Hostname:</string>
@@ -77,6 +78,7 @@ background-color: red;
       <string notr="true">QGroupBox {
 font: 75 10pt &quot;DejaVu Sans&quot;;
 font-weight: bold;
+color:white
 }
 </string>
      </property>
@@ -86,6 +88,9 @@ font-weight: bold;
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <widget class="QPlainTextEdit" name="description">
+        <property name="styleSheet">
+         <string notr="true">color:white</string>
+        </property>
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
         </property>

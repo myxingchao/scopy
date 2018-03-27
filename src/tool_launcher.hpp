@@ -162,6 +162,7 @@ private:
 	void setupHomepage();
 	void updateHomepage();
 	void readPreferences();
+	void loadIndexPageFromContent(QString fileLocation);
 
 private:
 	Ui::ToolLauncher *ui;
@@ -221,6 +222,7 @@ private:
 	bool manual_calibration_enabled;
 
 	QString indexFile;
+	QString deviceInfo;
 	QString pathToFile;
 };
 
