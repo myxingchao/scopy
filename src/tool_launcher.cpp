@@ -110,8 +110,9 @@ ToolLauncher::ToolLauncher(QWidget *parent) :
 	setWindowTitle(QString("Scopy - ") + QString(SCOPY_VERSION_GIT));
 
 	const QVector<QString>& uris = searchDevices();
-	for (const QString& each : uris)
+	for (const QString& each : uris) {
 		addContext(each);
+	}
 
 	current = ui->homeWidget;
 
@@ -260,8 +261,6 @@ void ToolLauncher::loadIndexPageFromContent(QString fileLocation)
 			indexFile.close();
 			index->setSource(QUrl::fromLocalFile(fileInfo.filePath()));
 			ui->stackedWidget->addWidget(index);
-			int count = ui->stackedWidget->count();
-			qDebug() << "the number of homapeges is:" << count;
 			ui->stackedWidget->moveRight();
 		} else {
 			indexFile.close();
@@ -316,9 +315,11 @@ void ToolLauncher::resetSession()
 	bool deviceConnected = false;
 	QString uri;
 	if (ctx) {
+
+//		QVector<QPair<QWidget, Ui::Device> *> devices;
 		for (auto it = devices.begin(); it != devices.end(); ++it) {
-			if ((*it)->second.btn->isChecked()) {
-				uri = (*it)->second.btn->property("uri").toString();
+			if ((*it)->deviceType()->btn->isChecked()) {
+				uri = (*it)->deviceType()->btn->property("uri").toString();
 			}
 		}
 		this->disconnect();
@@ -340,8 +341,8 @@ void ToolLauncher::resetSession()
 
 	if (deviceConnected) {
 		for (auto it = devices.begin(); it != devices.end(); ++it) {
-			if ((*it)->second.btn->property("uri").toString() == uri) {
-				(*it)->second.btn->setChecked(true);
+			if ((*it)->deviceType()->btn->property("uri").toString() == uri) {
+				(*it)->deviceType()->btn->setChecked(true);
 				on_btnConnect_clicked(true);
 				break;
 			}
@@ -443,11 +444,11 @@ void ToolLauncher::updateListOfDevices(const QVector<QString>& uris)
 	//Delete devices that are in the devices list but not found anymore when scanning
 
 	for (auto it = devices.begin(); it != devices.end();) {
-		QString uri = (*it)->second.btn->property("uri").toString();
+		QString uri = (*it)->deviceType()->btn->property("uri").toString();
 
 		if (uri.startsWith("usb:") && !uris.contains(uri)) {
-			if ((*it)->second.btn->isChecked()){
-				(*it)->second.btn->click();
+			if ((*it)->deviceType()->btn->isChecked()){
+				(*it)->deviceType()->btn->click();
 				return;
 			}
 			delete *it;
@@ -464,7 +465,7 @@ void ToolLauncher::updateListOfDevices(const QVector<QString>& uris)
 		bool found = false;
 
 		for (const auto each : devices) {
-			QString str = each->second.btn->property("uri")
+			QString str = each->deviceType()->btn->property("uri")
 				.toString();
 
 			if (str == uri) {
@@ -473,8 +474,9 @@ void ToolLauncher::updateListOfDevices(const QVector<QString>& uris)
 			}
 		}
 
-		if (!found)
+		if (!found) {
 			addContext(uri);
+		}
 	}
 
 	search_timer->start(TIMER_TIMEOUT_MS);
@@ -636,49 +638,57 @@ void ToolLauncher::destroyPopup()
 
 QPushButton *ToolLauncher::addContext(const QString& uri)
 {
-	auto pair = new QPair<QWidget, Ui::Device>;
-	pair->second.setupUi(&pair->first);
+	DeviceAvailable* newDevice = new DeviceAvailable();
+	newDevice->deviceType()->setupUi(newDevice->widgetType());
 
-	pair->second.description->setText(uri);
+	newDevice->deviceType()->description->setText(uri);
+	ui->devicesList->addWidget(newDevice->widgetType());
 
-	ui->devicesList->addWidget(&pair->first);
+	QGroupBox *newWidget = new QGroupBox(ui->stackedWidget);
 
-	connect(pair->second.btn, SIGNAL(clicked(bool)),
+	connect(newDevice->deviceType()->btn, SIGNAL(clicked(bool)),
 		this, SLOT(device_btn_clicked(bool)));
 
-	pair->second.btn->setProperty("uri", QVariant(uri));
-	devices.append(pair);
+	index = new QTextBrowser(ui->stackedWidget);
+	index->setFrameShape(QFrame::NoFrame);
+	deviceInfo = "d:/info.html";
+	loadIndexPageFromContent(deviceInfo);
 
-	return pair->second.btn;
+	newDevice->deviceType()->btn->setProperty("uri", QVariant(uri));
+	newDevice->setIndexNumber(devices.size());
+	devices.append(newDevice);
+
+	//		deviceInfo = "d:/info.html";
+	//		loadIndexPageFromContent(deviceInfo);
+
+	return newDevice->deviceType()->btn;
 }
 
-void ToolLauncher::addRemoteContext()
+void adiscope::ToolLauncher::addRemoteContext()
 {
-	pv::widgets::Popup *popup = new pv::widgets::Popup(ui->homeWidget, QBrush(QColor(39, 39, 48)));
-	connect(popup, SIGNAL(closed()), this, SLOT(destroyPopup()));
-
-	QPoint pos = ui->groupBox->mapToGlobal(ui->btnAdd->pos());
-	pos += QPoint(ui->btnAdd->width() / 2, ui->btnAdd->height());
-
-	popup->set_position(pos, pv::widgets::Popup::Bottom);
-	popup->show();
+	QGroupBox *popup = new QGroupBox(ui->stackedWidget);
+	static int count = 1;
+	if (count) {
+		count--;
+		ui->stackedWidget->addWidget(popup);
+		ui->stackedWidget->moveRight();
+	}
 
 	ConnectDialog *dialog = new ConnectDialog(popup);
 	connect(dialog, &ConnectDialog::newContext,
 	[=](const QString& uri) {
 		bool found = false;
 		for (auto it = devices.begin(); it != devices.end(); ++it) {
-			QString dev_uri = (*it)->second.btn->property("uri").toString();
+			QString dev_uri = (*it)->deviceType()->btn->property("uri").toString();
 			if (dev_uri == uri) {
 				found = true;
-				highlightDevice((*it)->second.btn);
+				highlightDevice((*it)->deviceType()->btn);
 				break;
 			}
 		}
 		if (!found) {
 			addContext(uri);
 		}
-		popup->close();
 	});
 }
 
@@ -739,7 +749,6 @@ void ToolLauncher::swapMenu(QWidget *menu)
 		MenuOption *mo = static_cast<MenuOption *>(tl->runButton()->parentWidget());
 		if (mo->isDetached())
 			return;
-
 	}
 
 	if (current) {
@@ -833,7 +842,7 @@ void adiscope::ToolLauncher::resetStylesheets()
 	setDynamicProperty(ui->btnConnect, "failed", false);
 
 	for (auto it = devices.begin(); it != devices.end(); ++it) {
-		QPushButton *btn = (*it)->second.btn;
+		QPushButton *btn = (*it)->deviceType()->btn;
 		setDynamicProperty(btn, "connected", false);
 		setDynamicProperty(btn, "failed", false);
 	}
@@ -843,25 +852,25 @@ void adiscope::ToolLauncher::device_btn_clicked(bool pressed)
 {
 	if (pressed) {
 		for (auto it = devices.begin(); it != devices.end(); ++it)
-			if ((*it)->second.btn != sender()) {
-				(*it)->second.btn->setChecked(false);
+			if ((*it)->deviceType()->btn != sender()) {
+				(*it)->deviceType()->btn->setChecked(false);
 			}
 	}
 	deviceInfo = "";
-	updateHomepage();
-	setupHomepage();
+//	updateHomepage();
+//	setupHomepage();
 
 	ui->btnConnect->setEnabled(pressed);
 	// add a new page to the home screen
 	// display current device info on the new page's content
 	// currently is working properly only if the file is at the path that is
 	// assigned to the deviceInfo string
-	if (pressed) {
-		index = new QTextBrowser(ui->stackedWidget);
-		index->setFrameShape(QFrame::NoFrame);
-		deviceInfo = "d:/info.html";
-		loadIndexPageFromContent(deviceInfo);
-	}
+//	if (pressed) {
+//		index = new QTextBrowser(ui->stackedWidget);
+//		index->setFrameShape(QFrame::NoFrame);
+//		deviceInfo = "d:/info.html";
+//		loadIndexPageFromContent(deviceInfo);
+//	}
 
 	if (pressed){
 		ui->btnConnect->setToolTip(QString("Click to connect the device"));
@@ -933,9 +942,9 @@ void adiscope::ToolLauncher::on_btnConnect_clicked(bool pressed)
 	QLabel *label = nullptr;
 
 	for (auto it = devices.begin(); !btn && it != devices.end(); ++it) {
-		if ((*it)->second.btn->isChecked()) {
-			btn = (*it)->second.btn;
-			label = (*it)->second.name;
+		if ((*it)->deviceType()->btn->isChecked()) {
+			btn = (*it)->deviceType()->btn;
+			label = (*it)->deviceType()->name;
 		}
 	}
 
@@ -1348,7 +1357,7 @@ void ToolLauncher::checkIp(const QString& ip)
 
 		bool found = false;
 		for (auto it = devices.begin(); it != devices.end(); ++it) {
-			QString dev_uri = (*it)->second.btn->property("uri").toString();
+			QString dev_uri = (*it)->deviceType()->btn->property("uri").toString();
 			if (dev_uri == uri) {
 				found = true;
 				break;
@@ -1625,7 +1634,7 @@ bool ToolLauncher_API::connect(const QString& uri)
 
 	for (auto it = tl->devices.begin();
 	     !btn && it != tl->devices.end(); ++it) {
-		QPushButton *tmp = (*it)->second.btn;
+		QPushButton *tmp = (*it)->deviceType()->btn;
 
 		if (tmp->property("uri").toString().compare(uri) == 0) {
 			btn = tmp;
@@ -1739,4 +1748,55 @@ void ToolLauncher::addDebugWindow()
 	window->show();
 	debugWindows.append(window);
 	debugInstances.append(debug);
+}
+
+DeviceAvailable::DeviceAvailable(QWidget *parent)
+	: m_deviceType(new Ui::Device),
+	  m_widgetType(new QWidget)
+{}
+
+DeviceAvailable::~DeviceAvailable()
+{
+	delete m_widgetType;
+	delete m_deviceType;
+}
+
+QWidget *DeviceAvailable::widgetType() const
+{
+	return m_widgetType;
+}
+
+void DeviceAvailable::setWidgetType(QWidget *widgetType)
+{
+	m_widgetType = widgetType;
+}
+
+Ui::Device *DeviceAvailable::deviceType() const
+{
+	return m_deviceType;
+}
+
+void DeviceAvailable::setDeviceType(Ui::Device *deviceType)
+{
+	m_deviceType = deviceType;
+}
+
+unsigned DeviceAvailable::indexNumber() const
+{
+	return m_indexNumber;
+}
+
+void DeviceAvailable::setIndexNumber(const unsigned &indexNumber)
+{
+	m_indexNumber = indexNumber;
+}
+
+QTextBrowser *DeviceAvailable::deviceInfo() const
+{
+	return m_deviceInfo;
+}
+
+void DeviceAvailable::setDeviceInfo(QTextBrowser *deviceInfo)
+{
+	m_deviceInfo = deviceInfo;
 }

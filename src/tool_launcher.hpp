@@ -62,6 +62,7 @@ class GenericDac;
 
 namespace adiscope {
 class ToolLauncher_API;
+class DeviceAvailable;
 class SpectrumAnalyzer;
 class Debugger;
 class ManualCalibration;
@@ -69,6 +70,7 @@ class ManualCalibration;
 class ToolLauncher : public QMainWindow
 {
 	friend class ToolLauncher_API;
+	friend class DeviceAvailable;
 
 	Q_OBJECT
 
@@ -174,7 +176,7 @@ private:
 	QVector<Debugger*> debugInstances;
 	QVector<DetachedWindow *> debugWindows;
 
-	QVector<QPair<QWidget, Ui::Device> *> devices;
+	QVector<DeviceAvailable *> devices;
 	QVector<Tool*> toolList;
 
 	QTimer *search_timer, *alive_timer;
@@ -303,6 +305,33 @@ public:
 
 private:
 	ToolLauncher *tl;
+};
+
+class DeviceAvailable: public QWidget {
+
+	Q_OBJECT
+
+public:
+	explicit DeviceAvailable(QWidget *parent = 0);
+	~DeviceAvailable();
+
+	QWidget *widgetType() const;
+	void setWidgetType(QWidget *widgetType);
+
+	Ui::Device *deviceType() const;
+	void setDeviceType(Ui::Device *deviceType);
+
+	unsigned indexNumber() const;
+	void setIndexNumber(const unsigned &indexNumber);
+
+	QTextBrowser *deviceInfo() const;
+	void setDeviceInfo(QTextBrowser *deviceInfo);
+
+private:
+	QWidget *m_widgetType;
+	Ui::Device *m_deviceType;
+	QTextBrowser *m_deviceInfo; // TO DO: TBD the type of this var
+	unsigned m_indexNumber;
 };
 }
 
