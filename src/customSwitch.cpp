@@ -67,6 +67,14 @@ bool CustomSwitch::event(QEvent *e)
 			off.setText(property("rightText").toString());
 		if(propName=="polarity" && property("polarity").isValid())
 			polarity = property("polarity").toBool();
+		if(propName=="bigBtn" && property("bigBtn").isValid()) {
+			if (property("bigBtn").toBool()) {
+				QFile file(":stylesheets/stylesheets/bigCustomSwitch.qss");
+				file.open(QFile::ReadOnly);
+				QString styleSheet = QString::fromLatin1(file.readAll());
+				this->setStyleSheet(styleSheet);
+			}
+		}
 
 	}
 	return QPushButton::event(e);

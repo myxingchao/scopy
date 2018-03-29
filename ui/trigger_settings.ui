@@ -51,8 +51,8 @@
     <widget class="QLabel" name="label_title">
      <property name="styleSheet">
       <string notr="true">color: white;
-	font-size: 14px;
-	font-weight: normal;
+        font-size: 14px;
+        font-weight: normal;
 </string>
      </property>
      <property name="text">
@@ -274,9 +274,9 @@
              </property>
              <property name="styleSheet">
               <string notr="true">QLabel {
-		font-size: 12px;
-		color: rgba(255, 255, 255, 70);
-	}</string>
+                font-size: 12px;
+                color: rgba(255, 255, 255, 70);
+        }</string>
              </property>
              <property name="text">
               <string>INTERNAL (ANALOG) </string>
@@ -475,9 +475,9 @@
              </property>
              <property name="styleSheet">
               <string notr="true">QLabel {
-		font-size: 12px;
-		color: rgba(255, 255, 255, 70);
-	}</string>
+                font-size: 12px;
+                color: rgba(255, 255, 255, 70);
+        }</string>
              </property>
              <property name="text">
               <string>EXTERNAL (DIGITAL) </string>
@@ -621,9 +621,9 @@
              </property>
              <property name="styleSheet">
               <string notr="true">QLabel {
-		font-size: 12px;
-		color: rgba(255, 255, 255, 70);
-	}</string>
+                font-size: 12px;
+                color: rgba(255, 255, 255, 70);
+        }</string>
              </property>
              <property name="text">
               <string>TRIGGER LOGIC </string>
