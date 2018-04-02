@@ -307,7 +307,26 @@ private:
 	ToolLauncher *tl;
 };
 
-class DeviceAvailable: public QWidget {
+class HomepageContent : public QWidget
+{
+	Q_OBJECT
+public:
+	explicit HomepageContent(QWidget *parent = 0);
+	virtual ~HomepageContent(){}
+
+	unsigned indexNumber() const;
+	void setIndexNumber(const unsigned &indexNumber);
+
+	QTextBrowser *content() const;
+	void setContent(QTextBrowser *content);
+
+private:
+	QTextBrowser *m_content;
+	unsigned m_indexNumber;
+
+};
+
+class DeviceAvailable: public HomepageContent {
 
 	Q_OBJECT
 
@@ -315,23 +334,24 @@ public:
 	explicit DeviceAvailable(QWidget *parent = 0);
 	~DeviceAvailable();
 
+private:
+	enum DeviceConnectedBy{USB = 0, IP = 1};
+
+public:
 	QWidget *widgetType() const;
 	void setWidgetType(QWidget *widgetType);
 
 	Ui::Device *deviceType() const;
 	void setDeviceType(Ui::Device *deviceType);
 
-	unsigned indexNumber() const;
-	void setIndexNumber(const unsigned &indexNumber);
-
-	QTextBrowser *deviceInfo() const;
-	void setDeviceInfo(QTextBrowser *deviceInfo);
+	DeviceConnectedBy deviceConnectedBy() const;
+	void setDeviceConnectedBy(const DeviceConnectedBy &deviceConnectedBy);
 
 private:
 	QWidget *m_widgetType;
 	Ui::Device *m_deviceType;
-	QTextBrowser *m_deviceInfo; // TO DO: TBD the type of this var
-	unsigned m_indexNumber;
+	DeviceConnectedBy m_deviceConnectedBy;
+	//	QTextBrowser *m_deviceInfo; // TO DO: TBD the type of this var
 };
 }
 

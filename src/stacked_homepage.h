@@ -50,6 +50,7 @@ public:
 public Q_SLOTS:
 	void moveLeft();
 	void moveRight();
+	void moveToIndex(unsigned index);
 	void openFile();
 
 	void setSpeed(int speed);

@@ -200,7 +200,7 @@ ToolLauncher::ToolLauncher(QWidget *parent) :
 
 	search_timer = new QTimer();
 	connect(search_timer, SIGNAL(timeout()), this, SLOT(search()));
-	connect(&watcher, SIGNAL(finished()), this, SLOT(update()));
+//	connect(&watcher, SIGNAL(finished()), this, SLOT(update()));
 	search_timer->start(TIMER_TIMEOUT_MS);
 
 	alive_timer = new QTimer();
@@ -315,8 +315,6 @@ void ToolLauncher::resetSession()
 	bool deviceConnected = false;
 	QString uri;
 	if (ctx) {
-
-//		QVector<QPair<QWidget, Ui::Device> *> devices;
 		for (auto it = devices.begin(); it != devices.end(); ++it) {
 			if ((*it)->deviceType()->btn->isChecked()) {
 				uri = (*it)->deviceType()->btn->property("uri").toString();
@@ -444,6 +442,10 @@ void ToolLauncher::updateListOfDevices(const QVector<QString>& uris)
 	//Delete devices that are in the devices list but not found anymore when scanning
 
 	for (auto it = devices.begin(); it != devices.end();) {
+		if (!dynamic_cast<DeviceAvailable*>((*it))) {
+			qDebug() << "homepage device";
+			continue;
+		}
 		QString uri = (*it)->deviceType()->btn->property("uri").toString();
 
 		if (uri.startsWith("usb:") && !uris.contains(uri)) {
@@ -638,16 +640,24 @@ void ToolLauncher::destroyPopup()
 
 QPushButton *ToolLauncher::addContext(const QString& uri)
 {
-	DeviceAvailable* newDevice = new DeviceAvailable();
+	DeviceAvailable *newDevice = new DeviceAvailable();
 	newDevice->deviceType()->setupUi(newDevice->widgetType());
 
 	newDevice->deviceType()->description->setText(uri);
 	ui->devicesList->addWidget(newDevice->widgetType());
 
-	QGroupBox *newWidget = new QGroupBox(ui->stackedWidget);
+//	QGroupBox *newWidget = new QGroupBox(ui->stackedWidget);
+	newDevice->setIndexNumber(devices.size());
 
 	connect(newDevice->deviceType()->btn, SIGNAL(clicked(bool)),
 		this, SLOT(device_btn_clicked(bool)));
+
+//	connect(newDevice, &QPushButton::clicked,
+//	[=](const bool& click) {
+//		if (click) {
+//			qDebug() <<"des";
+//		}
+//	});
 
 	index = new QTextBrowser(ui->stackedWidget);
 	index->setFrameShape(QFrame::NoFrame);
@@ -655,7 +665,6 @@ QPushButton *ToolLauncher::addContext(const QString& uri)
 	loadIndexPageFromContent(deviceInfo);
 
 	newDevice->deviceType()->btn->setProperty("uri", QVariant(uri));
-	newDevice->setIndexNumber(devices.size());
 	devices.append(newDevice);
 
 	//		deviceInfo = "d:/info.html";
@@ -679,6 +688,10 @@ void adiscope::ToolLauncher::addRemoteContext()
 	[=](const QString& uri) {
 		bool found = false;
 		for (auto it = devices.begin(); it != devices.end(); ++it) {
+			if (dynamic_cast<DeviceAvailable*>((*it))) {
+				qDebug() << "homepage device";
+				continue;
+			}
 			QString dev_uri = (*it)->deviceType()->btn->property("uri").toString();
 			if (dev_uri == uri) {
 				found = true;
@@ -713,11 +726,18 @@ void ToolLauncher::highlightDevice(QPushButton *btn)
 void ToolLauncher::setupHomepage()
 {
 	// Welcome page
-	welcome = new QTextBrowser(ui->stackedWidget);
-	welcome->setFrameShape(QFrame::NoFrame);
-	welcome->setOpenExternalLinks(true);
-	welcome->setSource(QUrl("qrc:/scopy.html"));
-	ui->stackedWidget->addWidget(welcome);
+	HomepageContent *welcomePage = new HomepageContent;
+	welcomePage->setContent(new QTextBrowser(ui->stackedWidget));
+//	welcome = new QTextBrowser(ui->stackedWidget);
+	welcomePage->content()->setFrameShape(QFrame::NoFrame);
+	welcomePage->content()->setOpenExternalLinks(true);
+	welcomePage->content()->setSource(QUrl("qrc:/scopy.html"));
+	ui->stackedWidget->addWidget(welcomePage->content());
+	welcomePage->setIndexNumber(devices.size());
+	devices.append(static_cast<DeviceAvailable*>(welcomePage));
+//	welcome->setFrameShape(QFrame::NoFrame);
+//	welcome->setOpenExternalLinks(true);
+//	welcome->setSource(QUrl("qrc:/scopy.html"));
 
 	// Index page
 	index = new QTextBrowser(ui->stackedWidget);
@@ -851,10 +871,16 @@ void adiscope::ToolLauncher::resetStylesheets()
 void adiscope::ToolLauncher::device_btn_clicked(bool pressed)
 {
 	if (pressed) {
-		for (auto it = devices.begin(); it != devices.end(); ++it)
+		for (auto it = devices.begin(); it != devices.end(); ++it) {
+			if (dynamic_cast<DeviceAvailable*>((*it))) {
+				continue;
+			}
 			if ((*it)->deviceType()->btn != sender()) {
 				(*it)->deviceType()->btn->setChecked(false);
+			} else {
+				ui->stackedWidget->moveToIndex((*it)->indexNumber());
 			}
+		}
 	}
 	deviceInfo = "";
 //	updateHomepage();
@@ -866,6 +892,8 @@ void adiscope::ToolLauncher::device_btn_clicked(bool pressed)
 	// currently is working properly only if the file is at the path that is
 	// assigned to the deviceInfo string
 //	if (pressed) {
+//		ui->stackedWidget->moveToIndex(index);
+//	}
 //		index = new QTextBrowser(ui->stackedWidget);
 //		index->setFrameShape(QFrame::NoFrame);
 //		deviceInfo = "d:/info.html";
@@ -942,6 +970,10 @@ void adiscope::ToolLauncher::on_btnConnect_clicked(bool pressed)
 	QLabel *label = nullptr;
 
 	for (auto it = devices.begin(); !btn && it != devices.end(); ++it) {
+		if (!dynamic_cast<DeviceAvailable*>((*it))) {
+			qDebug() << "homepage device";
+			continue;
+		}
 		if ((*it)->deviceType()->btn->isChecked()) {
 			btn = (*it)->deviceType()->btn;
 			label = (*it)->deviceType()->name;
@@ -1750,9 +1782,33 @@ void ToolLauncher::addDebugWindow()
 	debugInstances.append(debug);
 }
 
+HomepageContent::HomepageContent(QWidget *parent)
+{}
+
+unsigned HomepageContent::indexNumber() const
+{
+	return m_indexNumber;
+}
+
+void HomepageContent::setIndexNumber(const unsigned &indexNumber)
+{
+	m_indexNumber = indexNumber;
+}
+
+QTextBrowser *HomepageContent::content() const
+{
+	return m_content;
+}
+
+void HomepageContent::setContent(QTextBrowser *content)
+{
+	m_content = content;
+}
+
 DeviceAvailable::DeviceAvailable(QWidget *parent)
 	: m_deviceType(new Ui::Device),
-	  m_widgetType(new QWidget)
+	  m_widgetType(new QWidget),
+	  m_deviceConnectedBy(DeviceAvailable::USB)
 {}
 
 DeviceAvailable::~DeviceAvailable()
@@ -1781,22 +1837,12 @@ void DeviceAvailable::setDeviceType(Ui::Device *deviceType)
 	m_deviceType = deviceType;
 }
 
-unsigned DeviceAvailable::indexNumber() const
+DeviceAvailable::DeviceConnectedBy DeviceAvailable::deviceConnectedBy() const
 {
-	return m_indexNumber;
+	return m_deviceConnectedBy;
 }
 
-void DeviceAvailable::setIndexNumber(const unsigned &indexNumber)
+void DeviceAvailable::setDeviceConnectedBy(const DeviceConnectedBy &deviceConnectedBy)
 {
-	m_indexNumber = indexNumber;
-}
-
-QTextBrowser *DeviceAvailable::deviceInfo() const
-{
-	return m_deviceInfo;
-}
-
-void DeviceAvailable::setDeviceInfo(QTextBrowser *deviceInfo)
-{
-	m_deviceInfo = deviceInfo;
+	m_deviceConnectedBy = deviceConnectedBy;
 }

@@ -75,6 +75,12 @@ void StackedHomepage::moveRight()
 	s_hc->raise();
 }
 
+void StackedHomepage::moveToIndex(unsigned index)
+{
+	slideToIndex(index);
+	s_hc->raise();
+}
+
 void StackedHomepage::openFile()
 {
 	auto export_dialog( new QFileDialog( this ) );
