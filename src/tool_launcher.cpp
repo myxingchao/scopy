@@ -114,6 +114,8 @@ ToolLauncher::ToolLauncher(QWidget *parent) :
 		addContext(each);
 	}
 
+	HomepageContent *addDeviceBtn = new HomepageContent;
+	devices.append(dynamic_cast<DeviceAvailable*>(addDeviceBtn));
 	current = ui->homeWidget;
 
 	ui->menu->setMinimumSize(ui->menu->sizeHint());
@@ -200,7 +202,7 @@ ToolLauncher::ToolLauncher(QWidget *parent) :
 
 	search_timer = new QTimer();
 	connect(search_timer, SIGNAL(timeout()), this, SLOT(search()));
-//	connect(&watcher, SIGNAL(finished()), this, SLOT(update()));
+	connect(&watcher, SIGNAL(finished()), this, SLOT(update()));
 	search_timer->start(TIMER_TIMEOUT_MS);
 
 	alive_timer = new QTimer();
@@ -266,6 +268,19 @@ void ToolLauncher::loadIndexPageFromContent(QString fileLocation)
 			indexFile.close();
 		}
 	}
+}
+
+void ToolLauncher::sortDevices()
+{
+	for (auto it = devices.begin(); it != devices.end(); ++it) {
+		if (!dynamic_cast<HomepageContent*>((*it))) { // downcast
+			qDebug() << "homepage device";
+			continue;
+		}
+		QString dev_uri = (*it)->deviceType()->btn->property("uri").toString();
+		qDebug() << "device uri:" << dev_uri;
+
+		}
 }
 
 void ToolLauncher::saveSession()
@@ -428,8 +443,9 @@ QVector<QString> ToolLauncher::searchDevices()
 
 	nb_contexts = static_cast<unsigned int>(ret);
 
-	for (unsigned int i = 0; i < nb_contexts; i++)
+	for (unsigned int i = 0; i < nb_contexts; i++) {
 		uris.append(QString(iio_context_info_get_uri(info[i])));
+	}
 
 	iio_context_info_list_free(info);
 out_destroy_context:
@@ -442,19 +458,28 @@ void ToolLauncher::updateListOfDevices(const QVector<QString>& uris)
 	//Delete devices that are in the devices list but not found anymore when scanning
 
 	for (auto it = devices.begin(); it != devices.end();) {
-		if (!dynamic_cast<DeviceAvailable*>((*it))) {
+		if (!dynamic_cast<DeviceAvailable*>((*it)) ||
+		   (*it)->deviceConnectedBy() == DeviceAvailable::HOMEPAGE_CONTENT) {
 			qDebug() << "homepage device";
+			++it;
 			continue;
 		}
-		QString uri = (*it)->deviceType()->btn->property("uri").toString();
+		QString uri = (*it)->deviceInfo();
 
 		if (uri.startsWith("usb:") && !uris.contains(uri)) {
 			if ((*it)->deviceType()->btn->isChecked()){
 				(*it)->deviceType()->btn->click();
 				return;
 			}
+			qDebug() << ui->stackedWidget->count();
+			qDebug() << "delete" << (*it)->deviceInfo();
+			ui->stackedWidget->removeWidget((*it)->widgetType());
+			ui->stackedWidget->moveToIndex((*it)->indexNumber());
+			ui->stackedWidget->removeWidget(ui->stackedWidget->currentWidget());
 			delete *it;
 			it = devices.erase(it);
+			qDebug() << "number of homepage windows:" << ui->stackedWidget->count();
+			qDebug() << "number of widgets:" << ui->stackedWidget->count();
 		} else {
 			++it;
 		}
@@ -467,6 +492,10 @@ void ToolLauncher::updateListOfDevices(const QVector<QString>& uris)
 		bool found = false;
 
 		for (const auto each : devices) {
+			if (!dynamic_cast<DeviceAvailable*>(each) ) {
+				qDebug() << "homepage device";
+				continue;
+			}
 			QString str = each->deviceType()->btn->property("uri")
 				.toString();
 
@@ -642,22 +671,15 @@ QPushButton *ToolLauncher::addContext(const QString& uri)
 {
 	DeviceAvailable *newDevice = new DeviceAvailable();
 	newDevice->deviceType()->setupUi(newDevice->widgetType());
+	newDevice->setDeviceInfo(uri);
 
 	newDevice->deviceType()->description->setText(uri);
 	ui->devicesList->addWidget(newDevice->widgetType());
 
-//	QGroupBox *newWidget = new QGroupBox(ui->stackedWidget);
 	newDevice->setIndexNumber(devices.size());
 
 	connect(newDevice->deviceType()->btn, SIGNAL(clicked(bool)),
 		this, SLOT(device_btn_clicked(bool)));
-
-//	connect(newDevice, &QPushButton::clicked,
-//	[=](const bool& click) {
-//		if (click) {
-//			qDebug() <<"des";
-//		}
-//	});
 
 	index = new QTextBrowser(ui->stackedWidget);
 	index->setFrameShape(QFrame::NoFrame);
@@ -665,10 +687,18 @@ QPushButton *ToolLauncher::addContext(const QString& uri)
 	loadIndexPageFromContent(deviceInfo);
 
 	newDevice->deviceType()->btn->setProperty("uri", QVariant(uri));
+	if (uri.startsWith("usb:")) {
+		newDevice->setDeviceConnectedBy(DeviceAvailable::DeviceConnectedBy::USB);
+	} else if (uri.startsWith("ip:")) {
+		newDevice->setDeviceConnectedBy(DeviceAvailable::DeviceConnectedBy::IP);
+	} else {
+		newDevice->setDeviceConnectedBy(DeviceAvailable::HOMEPAGE_CONTENT);
+	}
 	devices.append(newDevice);
 
-	//		deviceInfo = "d:/info.html";
-	//		loadIndexPageFromContent(deviceInfo);
+	// verify if the order of the devices is right
+	// if the order is not right reorder the list
+	//TO DO: try when the order of the vector is changed to reorder the widgets too
 
 	return newDevice->deviceType()->btn;
 }
@@ -680,15 +710,15 @@ void adiscope::ToolLauncher::addRemoteContext()
 	if (count) {
 		count--;
 		ui->stackedWidget->addWidget(popup);
-		ui->stackedWidget->moveRight();
 	}
+	ui->stackedWidget->moveToIndex(2);
 
 	ConnectDialog *dialog = new ConnectDialog(popup);
 	connect(dialog, &ConnectDialog::newContext,
 	[=](const QString& uri) {
 		bool found = false;
 		for (auto it = devices.begin(); it != devices.end(); ++it) {
-			if (dynamic_cast<DeviceAvailable*>((*it))) {
+			if (!dynamic_cast<HomepageContent*>((*it))) { // downcast
 				qDebug() << "homepage device";
 				continue;
 			}
@@ -728,26 +758,23 @@ void ToolLauncher::setupHomepage()
 	// Welcome page
 	HomepageContent *welcomePage = new HomepageContent;
 	welcomePage->setContent(new QTextBrowser(ui->stackedWidget));
-//	welcome = new QTextBrowser(ui->stackedWidget);
 	welcomePage->content()->setFrameShape(QFrame::NoFrame);
 	welcomePage->content()->setOpenExternalLinks(true);
 	welcomePage->content()->setSource(QUrl("qrc:/scopy.html"));
 	ui->stackedWidget->addWidget(welcomePage->content());
 	welcomePage->setIndexNumber(devices.size());
-	devices.append(static_cast<DeviceAvailable*>(welcomePage));
-//	welcome->setFrameShape(QFrame::NoFrame);
-//	welcome->setOpenExternalLinks(true);
-//	welcome->setSource(QUrl("qrc:/scopy.html"));
+	devices.append(dynamic_cast<DeviceAvailable*>(welcomePage));  // downcast to derived class
+	ui->stackedWidget->moveToIndex(devices.size());
 
 	// Index page
-	index = new QTextBrowser(ui->stackedWidget);
-	index->setFrameShape(QFrame::NoFrame);
+//	index = new QTextBrowser(ui->stackedWidget);
+//	index->setFrameShape(QFrame::NoFrame);
 
-	if (indexFile == "") {
-		return;
-	}
+//	if (indexFile == "") {
+//		return;
+//	}
 
-	loadIndexPageFromContent(indexFile);
+//	loadIndexPageFromContent(indexFile);
 }
 
 void ToolLauncher::updateHomepage()
@@ -862,6 +889,10 @@ void adiscope::ToolLauncher::resetStylesheets()
 	setDynamicProperty(ui->btnConnect, "failed", false);
 
 	for (auto it = devices.begin(); it != devices.end(); ++it) {
+		if (!dynamic_cast<DeviceAvailable*>((*it)) ||
+		    (*it)->deviceConnectedBy() == DeviceAvailable::HOMEPAGE_CONTENT) {
+			continue;
+		}
 		QPushButton *btn = (*it)->deviceType()->btn;
 		setDynamicProperty(btn, "connected", false);
 		setDynamicProperty(btn, "failed", false);
@@ -872,11 +903,12 @@ void adiscope::ToolLauncher::device_btn_clicked(bool pressed)
 {
 	if (pressed) {
 		for (auto it = devices.begin(); it != devices.end(); ++it) {
-			if (dynamic_cast<DeviceAvailable*>((*it))) {
+			if (!dynamic_cast<HomepageContent*>((*it))) { //upcast
 				continue;
 			}
 			if ((*it)->deviceType()->btn != sender()) {
 				(*it)->deviceType()->btn->setChecked(false);
+				qDebug() << (*it)->deviceInfo() << "is not selected anymore";
 			} else {
 				ui->stackedWidget->moveToIndex((*it)->indexNumber());
 			}
@@ -942,8 +974,6 @@ void adiscope::ToolLauncher::disconnect()
 		loadToolTips(false);
 		resetStylesheets();
 		search_timer->start(TIMER_TIMEOUT_MS);
-
-
 	}
 
 	/* Update the list of devices now */
@@ -970,7 +1000,7 @@ void adiscope::ToolLauncher::on_btnConnect_clicked(bool pressed)
 	QLabel *label = nullptr;
 
 	for (auto it = devices.begin(); !btn && it != devices.end(); ++it) {
-		if (!dynamic_cast<DeviceAvailable*>((*it))) {
+		if (!dynamic_cast<HomepageContent*>((*it))) {
 			qDebug() << "homepage device";
 			continue;
 		}
@@ -1571,8 +1601,7 @@ void ToolLauncher::detachToolOnPosition(int position)
 			else if (x->getName() == "Calibration")
 				manual_calibration->detached();
 			else
-				spectrum_analyzer->detached();
-		
+				spectrum_analyzer->detached();		
 			}
 }
 
@@ -1845,4 +1874,14 @@ DeviceAvailable::DeviceConnectedBy DeviceAvailable::deviceConnectedBy() const
 void DeviceAvailable::setDeviceConnectedBy(const DeviceConnectedBy &deviceConnectedBy)
 {
 	m_deviceConnectedBy = deviceConnectedBy;
+}
+
+QString DeviceAvailable::deviceInfo() const
+{
+	return m_deviceInfo;
+}
+
+void DeviceAvailable::setDeviceInfo(const QString &deviceInfo)
+{
+	m_deviceInfo = deviceInfo;
 }

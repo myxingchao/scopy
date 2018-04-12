@@ -165,6 +165,7 @@ private:
 	void updateHomepage();
 	void readPreferences();
 	void loadIndexPageFromContent(QString fileLocation);
+	void sortDevices();
 
 private:
 	Ui::ToolLauncher *ui;
@@ -334,8 +335,8 @@ public:
 	explicit DeviceAvailable(QWidget *parent = 0);
 	~DeviceAvailable();
 
-private:
-	enum DeviceConnectedBy{USB = 0, IP = 1};
+public:
+	enum DeviceConnectedBy{HOMEPAGE_CONTENT = 0, USB = 1, IP = 2};
 
 public:
 	QWidget *widgetType() const;
@@ -347,10 +348,14 @@ public:
 	DeviceConnectedBy deviceConnectedBy() const;
 	void setDeviceConnectedBy(const DeviceConnectedBy &deviceConnectedBy);
 
+	QString deviceInfo() const;
+	void setDeviceInfo(const QString &deviceInfo);
+
 private:
 	QWidget *m_widgetType;
 	Ui::Device *m_deviceType;
 	DeviceConnectedBy m_deviceConnectedBy;
+	QString m_deviceInfo;
 	//	QTextBrowser *m_deviceInfo; // TO DO: TBD the type of this var
 };
 }
