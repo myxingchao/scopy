@@ -3,6 +3,7 @@
 set -e
 cd ${WORKDIR}
 
+sudo apt-get update
 sudo apt-get install python-markdown python-cheetah libfftw3-dev libusb-1.0-0-dev
 mkdir -p deps
 cd deps
@@ -15,14 +16,10 @@ if [ ! -f volk-1.3.tar.gz ]; then
   wget http://libvolk.org/releases/volk-1.3.tar.gz
   tar -xzf volk-1.3.tar.gz
 fi  
-if [ ! -d volk-1.3 ]; then
-  cd volk-1.3
-  mkdir build && cd build
-  cmake ..
-  make
-else
-  cd volk-1.3/build
-fi
+cd volk-1.3
+mkdir -p build && cd build
+cmake ..
+make
 sudo make install
 
 cd ${WORKDIR}
