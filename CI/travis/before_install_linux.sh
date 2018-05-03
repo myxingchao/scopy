@@ -3,24 +3,12 @@
 set -e
 cd ${WORKDIR}
 
-apt-get install python-markdown python-cheetah libvolk1-dev
+sudo apt-get install python-markdown python-cheetah libvolk1-dev
 mkdir -p deps
 cd deps
 WORKDIR=$PWD
 
-cd ${WORKDIR}
-if [ ! -f boost_1_63_0.tar.gz ]; then
-  wget https://netcologne.dl.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.gz
-  tar -xzf boost_1_63_0.tar.gz
-fi;
-if [ ! -d boost_1_63_0 ]; then
-  cd boost_1_63_0
-  ./bootstrap.sh --with-libraries=date_time,filesystem,program_options,regex,system,test,thread >/dev/null
-  ./b2 >/dev/null
-else
-  cd boost_1_63_0
-fi
-sudo ./b2 install >/dev/null
+#if [[ `lsb_release -rs` == "" ]]
 
 #cd ${WORKDIR}
 #rm volk-1.3.tar.gz*
@@ -51,32 +39,6 @@ cmake -DENABLE_INTERNAL_VOLK:BOOL=OFF -DENABLE_GR_FEC:BOOL=OFF -DENABLE_GR_DIGIT
 make
 sudo make install >/dev/null
 
-cd ${WORKDIR}
-if [ ! -d libsigrok ]; then
-  git clone https://github.com/sschnelle/libsigrok/
-  cd libsigrok
-  ./autogen.sh
-  ./configure --disable-all-drivers --enable-bindings --enable-cxx
-  make
-else
-  cd libsigrok
-fi
-sudo make install
-
-cd ${WORKDIR}
-if [ ! -f libsigrokdecode-0.4.1.tar.gz ]; then
-  wget http://sigrok.org/download/source/libsigrokdecode/libsigrokdecode-0.4.1.tar.gz
-  tar -xzvf libsigrokdecode-0.4.1.tar.gz
-fi;
-if [ ! -d libsigrokdecode-0.4.1 ]; then
-  cd libsigrokdecode-0.4.1
-  ./configure
-  make
-else
-  cd libsigrokdecode-0.4.1
-fi
-sudo make install
-
 cd  ${WORKDIR}
 if [ ! -d qwt ]; then
   git clone https://github.com/osakared/qwt.git -b qwt-6.1-multiaxes
@@ -90,7 +52,6 @@ fi
 sudo make install
 
 cd ${WORKDIR}
-rm qwtpolar-1.1.1.tar.bz2*
 if [ ! -d qwtpolar-1.1.1 ]; then
   wget https://downloads.sourceforge.net/project/qwtpolar/qwtpolar/1.1.1/qwtpolar-1.1.1.tar.bz2
   tar xvjf qwtpolar-1.1.1.tar.bz2
@@ -109,20 +70,6 @@ if [ ! -d qwtpolar-1.1.1 ]; then
   make
 else
   cd qwtpolar-1.1.1
-fi
-sudo make install
-
-cd ${WORKDIR}
-if [ ! -d libiio ]; then
-  git clone https://github.com/analogdevicesinc/libiio
-  cd libiio && mkdir build
-  cd build
-  cmake -DCMAKE_INSTALL_LIBDIR:STRING=lib -DINSTALL_UDEV_RULE:BOOL=OFF -DPYTHON_BINDINGS:BOOL=OFF -DCSHARP_BINDINGS:BOOL=OFF -DWITH_TESTS:BOOL=OFF -DWITH_DOC:BOOL=OFF -DWITH_IIOD:BOOL=OFF -DWITH_LOCAL_BACKEND:BOOL=OFF -DWITH_MATLAB_BINDINGS_API:BOOL=OFF ..
-  make
-else
-  cd libiio
-  git pull
-  cd build
 fi
 sudo make install
 
