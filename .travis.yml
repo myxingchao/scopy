@@ -10,6 +10,24 @@ cache:
 python:
   - "3.6"
 
+addons:
+  apt:
+    sources:
+    - debian-sid
+    packages:
+    - cmake
+    - qt5-default
+    - qttools5-dev
+    - qtdeclarative5-dev
+    - libqt5svg5-dev
+    - libglibmm-2.4-dev
+    - libvolk-dev
+    - libsigrokcxx-dev
+    - libsigrokdecode-dev
+    - libboost-dev
+    - libmatio-dev
+
+
 matrix:
   fast_finish: true
   include:
