@@ -1,6 +1,6 @@
 #!/bin/sh
 
-sudo add-apt-repository --yes ppa:jonathonf/python-3.6
+#sudo add-apt-repository --yes ppa:jonathonf/python-3.6
 sudo add-apt-repository --yes ppa:beineri/opt-qt592-trusty
 sudo apt-get -qq update
 sudo apt-get install -y git cmake libzip-dev libusb-1.0-0-dev autoconf libtool libxml2 libxml2-dev python3.6 python-dev python3.6-dev libfftw3-dev libffi-dev
@@ -10,11 +10,11 @@ sudo apt-get install -y --force-yes qt59base qt59declarative qt59quickcontrols q
 source /opt/qt59/bin/qt59-env.sh && qmllint client/qml/*.qml
 cd ${WORKDIR}
 
-sudo mv /usr/bin/python3 /usr/bin/python3-old
-sudo ln -s /usr/bin/python3.6 /usr/bin/python3
-sudo ln -s /usr/bin/python3.6m /usr/bin/python3m
-sudo ln -s /usr/bin/python3.6m-config /usr/bin/python3m-config
-sudo sed -i "s/4/6/g" /usr/lib/x86_64-linux-gnu/pkgconfig/python3.pc
+#sudo mv /usr/bin/python3 /usr/bin/python3-old
+#sudo ln -s /usr/bin/python3.6 /usr/bin/python3
+#sudo ln -s /usr/bin/python3.6m /usr/bin/python3m
+#sudo ln -s /usr/bin/python3.6m-config /usr/bin/python3m-config
+#sudo sed -i "s/4/6/g" /usr/lib/x86_64-linux-gnu/pkgconfig/python3.pc
 
 mkdir -p deps
 cd deps

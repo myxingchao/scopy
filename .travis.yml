@@ -8,7 +8,7 @@ cache:
     - ${TRAVIS_BUILD_DIR}/deps
 
 python:
-  - "3.5"
+  - "3.6"
 
 matrix:
   fast_finish: true
@@ -23,8 +23,7 @@ matrix:
       env: LDIST=-osx_10.12
     - compiler: gcc
       os: linux
-      dist: trusty
-      env: LDIST=-trusty
+      dist: xenial
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./CI/travis/before_install_darwin.sh ; fi
