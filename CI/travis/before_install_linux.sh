@@ -9,6 +9,7 @@ sudo apt-get install python-cheetah python-markdown
 sudo apt-get install -y libmount-dev libpcre3-dev libglib2.0-dev libsigc++-2.0-dev libglibmm-2.4-dev doxygen libglu1-mesa-dev curl flex bison libmatio2 libmatio-dev libavahi-client-dev libavahi-common-dev
 sudo apt-get install -y --force-yes qt59base qt59declarative qt59quickcontrols qt59svg qt59tools
 
+sudo mkdir -p /opt/scopy
 source /opt/qt59/bin/qt59-env.sh && qmllint client/qml/*.qml
 cd ${WORKDIR}
 
@@ -21,6 +22,18 @@ cd ${TRAVIS_BUILD_DIR}/../static-deps/usr
 INSTALLED_DEPS=$PWD
 echo $INSTALLED_DEPS
 
+#cd ${WORKDIR}
+#rm boost_1_63_0.tar.gz*
+#if [ ! -d boost_1_63_0 ]; then
+#  wget https://netcologne.dl.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.gz
+#  tar -xzf boost_1_63_0.tar.gz
+#  cd boost_1_63_0
+#  ./bootstrap.sh --with-libraries=date_time,filesystem,program_options,regex,system,test,thread >/dev/null
+#  ./b2 link=static --prefix=${INSTALLED_DEPS} >/dev/null
+#else
+#  cd boost_1_63_0
+#fi
+#sudo ./b2 link=static --prefix=${INSTALLED_DEPS} install >/dev/null
 cd ${WORKDIR}
 rm boost_1_63_0.tar.gz*
 if [ ! -d boost_1_63_0 ]; then
@@ -28,11 +41,25 @@ if [ ! -d boost_1_63_0 ]; then
   tar -xzf boost_1_63_0.tar.gz
   cd boost_1_63_0
   ./bootstrap.sh --with-libraries=date_time,filesystem,program_options,regex,system,test,thread >/dev/null
-  ./b2 link=static --prefix=${INSTALLED_DEPS} >/dev/null
+  ./b2 --prefix=${INSTALLED_DEPS} >/dev/null
 else
   cd boost_1_63_0
 fi
-sudo ./b2 link=static --prefix=${INSTALLED_DEPS} install >/dev/null
+sudo ./b2 --prefix=${INSTALLED_DEPS} install >/dev/null
+
+#cd ${WORKDIR}
+#rm volk-1.3.tar.gz*
+#if [ ! -d volk-1.3 ]; then
+#  wget http://libvolk.org/releases/volk-1.3.tar.gz
+#  tar -xzf volk-1.3.tar.gz
+#  cd volk-1.3
+#  mkdir build && cd build
+#  cmake -DENABLE_STATIC_LIBS=ON -DCMAKE_FIND_LIBRARY_SUFFIXES=".a" -DCMAKE_PREFIX_PATH=${INSTALLED_DEPS} -DCMAKE_INSTALL_PREFIX=${INSTALLED_DEPS} -DENABLE_PROFILING=OFF -DENABLE_TESTING=OFF ..
+#  make
+#else
+#  cd volk-1.3/build
+#fi
+#sudo make install
 
 cd ${WORKDIR}
 rm volk-1.3.tar.gz*
@@ -41,17 +68,31 @@ if [ ! -d volk-1.3 ]; then
   tar -xzf volk-1.3.tar.gz
   cd volk-1.3
   mkdir build && cd build
-  cmake -DENABLE_STATIC_LIBS=ON -DCMAKE_FIND_LIBRARY_SUFFIXES=".a" -DCMAKE_PREFIX_PATH=${INSTALLED_DEPS} -DCMAKE_INSTALL_PREFIX=${INSTALLED_DEPS} -DENABLE_PROFILING=OFF -DENABLE_TESTING=OFF ..
+  cmake -DCMAKE_PREFIX_PATH=${INSTALLED_DEPS} -DCMAKE_INSTALL_PREFIX=${INSTALLED_DEPS} -DENABLE_PROFILING=OFF -DENABLE_TESTING=OFF ..
   make
 else
   cd volk-1.3/build
 fi
 sudo make install
 
-cd ${WORKDIR}/boost_1_63_0
-sudo ./b2 --prefix=${INSTALLED_DEPS} install >/dev/null
+#cd ${WORKDIR}/boost_1_63_0
+#sudo ./b2 --prefix=${INSTALLED_DEPS} install >/dev/null
+#sudo rm ${INSTALLED_DEPS}/lib/*.so*
 
-sudo rm ${INSTALLED_DEPS}/lib/*.so*
+#cd ${WORKDIR}
+#if [ ! -d gnuradio ]; then
+#  git clone https://github.com/analogdevicesinc/gnuradio -b static_libs
+#  cd gnuradio
+#  mkdir build
+#  cd build
+#else
+#  cd gnuradio
+#  git pull
+#  cd build
+#fi
+#cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=${INSTALLED_DEPS} -DCMAKE_PREFIX_PATH=${INSTALLED_DEPS} -DENABLE_STATIC_LIBS=ON -#DENABLE_INTERNAL_VOLK:​BOOL=OFF -DENABLE_GR_FEC:BOOL=OFF -DENABLE_GR_DIGITAL:BOOL=OFF -DENABLE_GR_DTV:BOOL=OFF -DENABLE_GR_ATSC:BOOL=OFF -#DENABLE_GR_AUDIO:BOOL=OFF -DENABLE_GR_CHANNELS:BOOL=OFF -DENABLE_GR_NOAA:BOOL=OFF -DENABLE_GR_PAGER:​BOOL=OFF -DENABLE_GR_TRELLIS:​BOOL=OFF #-DENABLE_GR_VOCODER:​BOOL=OFF ..
+#make
+#sudo make install >/dev/null
 
 cd ${WORKDIR}
 if [ ! -d gnuradio ]; then
@@ -64,7 +105,7 @@ else
   git pull
   cd build
 fi
-cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=${INSTALLED_DEPS} -DCMAKE_PREFIX_PATH=${INSTALLED_DEPS} -DENABLE_STATIC_LIBS=ON -DENABLE_INTERNAL_VOLK:​BOOL=OFF -DENABLE_GR_FEC:BOOL=OFF -DENABLE_GR_DIGITAL:BOOL=OFF -DENABLE_GR_DTV:BOOL=OFF -DENABLE_GR_ATSC:BOOL=OFF -DENABLE_GR_AUDIO:BOOL=OFF -DENABLE_GR_CHANNELS:BOOL=OFF -DENABLE_GR_NOAA:BOOL=OFF -DENABLE_GR_PAGER:​BOOL=OFF -DENABLE_GR_TRELLIS:​BOOL=OFF -DENABLE_GR_VOCODER:​BOOL=OFF ..
+cmake -DCMAKE_INSTALL_PREFIX=${INSTALLED_DEPS} -DCMAKE_PREFIX_PATH=${INSTALLED_DEPS} -DENABLE_INTERNAL_VOLK:​BOOL=OFF -DENABLE_GR_FEC:BOOL=OFF -DENABLE_GR_DIGITAL:BOOL=OFF -DENABLE_GR_DTV:BOOL=OFF -DENABLE_GR_ATSC:BOOL=OFF -DENABLE_GR_AUDIO:BOOL=OFF -DENABLE_GR_CHANNELS:BOOL=OFF -DENABLE_GR_NOAA:BOOL=OFF -DENABLE_GR_PAGER:​BOOL=OFF -DENABLE_GR_TRELLIS:​BOOL=OFF -DENABLE_GR_VOCODER:​BOOL=OFF ..
 make
 sudo make install >/dev/null
 
@@ -73,7 +114,7 @@ if [ ! -d libsigrok ]; then
   git clone https://github.com/sschnelle/libsigrok/
   cd libsigrok
   ./autogen.sh
-  ./configure --disable-all-drivers --enable-bindings --enable-cxx
+  ./configure --prefix=${INSTALLED_DEPS} --disable-all-drivers --enable-bindings --enable-cxx
   make
 else
   cd libsigrok
@@ -86,7 +127,7 @@ if [ ! -d libsigrokdecode-0.4.1 ]; then
   wget http://sigrok.org/download/source/libsigrokdecode/libsigrokdecode-0.4.1.tar.gz
   tar -xzvf libsigrokdecode-0.4.1.tar.gz
   cd libsigrokdecode-0.4.1
-  ./configure
+  ./configure --prefix=${INSTALLED_DEPS}
   make
 else
   cd libsigrokdecode-0.4.1
@@ -137,7 +178,7 @@ if [ ! -d libiio ]; then
   git clone https://github.com/analogdevicesinc/libiio
   cd libiio && mkdir build
   cd build
-  cmake -DCMAKE_INSTALL_LIBDIR:STRING=lib -DINSTALL_UDEV_RULE:BOOL=OFF -DPYTHON_BINDINGS:BOOL=OFF -DCSHARP_BINDINGS:BOOL=OFF -DWITH_TESTS:BOOL=OFF -DWITH_DOC:BOOL=OFF -DWITH_IIOD:BOOL=OFF -DWITH_LOCAL_BACKEND:BOOL=OFF -DWITH_MATLAB_BINDINGS_API:BOOL=OFF -DCMAKE_INSTALL_PREFIX=${INSTALLED_DEPS} -DBUILD_SHARED_LIBS=OFF ..
+  cmake -DCMAKE_INSTALL_LIBDIR:STRING=lib -DINSTALL_UDEV_RULE:BOOL=OFF -DPYTHON_BINDINGS:BOOL=OFF -DCSHARP_BINDINGS:BOOL=OFF -DWITH_TESTS:BOOL=OFF -DWITH_DOC:BOOL=OFF -DWITH_IIOD:BOOL=OFF -DWITH_LOCAL_BACKEND:BOOL=OFF -DWITH_MATLAB_BINDINGS_API:BOOL=OFF  -DCMAKE_PREFIX_PATH=${INSTALLED_DEPS} -DCMAKE_INSTALL_PREFIX=${INSTALLED_DEPS} ..
   make
 else
   cd libiio
@@ -152,7 +193,7 @@ if [ ! -d libad9361-iio ]; then
   cd libad9361-iio
   mkdir build
   cd build
-  cmake -DCMAKE_PREFIX_PATH=${INSTALLED_DEPS} -DCMAKE_INSTALL_PREFIX=${INSTALLED_DEPS} -DBUILD_SHARED_LIBS=OFF ..
+  cmake -DCMAKE_PREFIX_PATH=${INSTALLED_DEPS} -DCMAKE_INSTALL_PREFIX=${INSTALLED_DEPS} ..
   make
 else
   cd libad9361-iio
@@ -168,7 +209,7 @@ if [ ! -d gr-iio ]; then
   cd gr-iio
   mkdir build
   cd build
-  cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_PREFIX_PATH=${INSTALLED_DEPS} -DCMAKE_INSTALL_PREFIX=${INSTALLED_DEPS} ..
+  cmake -DCMAKE_PREFIX_PATH=${INSTALLED_DEPS} -DCMAKE_INSTALL_PREFIX=${INSTALLED_DEPS} ..
   make
 else
   cd gr-iio
@@ -177,7 +218,7 @@ else
 fi
 sudo make install
 
-sudo rm ${INSTALLED_DEPS}/lib/*.so*
+#sudo rm ${INSTALLED_DEPS}/lib/*.so*
 ls ${INSTALLED_DEPS}/lib
 #sudo mkdir -p /opt/scopy
 #sudo cp -R /opt/qt59/* /opt/scopy

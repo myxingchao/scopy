@@ -10,9 +10,8 @@ else
 	TRAVIS_BUILD=true
 fi
 
-sudo mkdir -p /opt/scopy
 sudo cp -R /opt/qt59/* /opt/scopy
-sudo cp /usr/local/lib/libsigrok*.so* /opt/scopy/lib
+#sudo cp /usr/local/lib/libsigrok*.so* /opt/scopy/lib
 mkdir -p ${TRAVIS_BUILD_DIR}/build
 cd ${TRAVIS_BUILD_DIR}/build
 
@@ -58,15 +57,15 @@ echo "$libs" | while read -r lib_path; do
 	echo "debian/scopy/opt/scopy/lib/$lib_name"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
 done
 
-libs="$(ldd ${TRAVIS_BUILD_DIR}/build/scopy | grep sigrok | cut -d " " -f 3)"
-echo "$libs" | while read -r lib_path; do
-	echo $lib_path;
-	sudo cp $lib_path ${TRAVIS_BUILD_DIR}/../libs/
+#libs="$(ldd ${TRAVIS_BUILD_DIR}/build/scopy | grep sigrok | cut -d " " -f 3)"
+#echo "$libs" | while read -r lib_path; do
+#	echo $lib_path;
+#	sudo cp $lib_path ${TRAVIS_BUILD_DIR}/../libs/
 
-	lib_name="$(echo $lib_path | rev | cut -d "/" -f 1 | rev)"
-	echo "debian/scopy/opt/scopy/lib/$lib_name opt/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
-	echo "debian/scopy/opt/scopy/lib/$lib_name"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
-done
+#	lib_name="$(echo $lib_path | rev | cut -d "/" -f 1 | rev)"
+#	echo "debian/scopy/opt/scopy/lib/$lib_name opt/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
+#	echo "debian/scopy/opt/scopy/lib/$lib_name"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
+#done
 
 libs="$(ldd ${TRAVIS_BUILD_DIR}/build/scopy | grep libicu | cut -d " " -f 3)"
 echo "$libs" | while read -r lib_path; do
@@ -76,6 +75,16 @@ echo "$libs" | while read -r lib_path; do
 	lib_name="$(echo $lib_path | rev | cut -d "/" -f 1 | rev)"
 	echo "debian/scopy/opt/scopy/lib/$lib_name opt/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
 	echo "debian/scopy/opt/scopy/lib/$lib_name"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
+done
+
+sudo cp -R /opt/scopy/lib ${TRAVIS_BUILD_DIR}/../libs/
+for ent in /opt/scopy/lib/*
+do 
+	if [ -f $ent ]; then
+		lib_name="$(echo $ent | rev | cut -d "/" -f 1 | rev)"
+		echo "debian/scopy/opt/scopy/lib/$lib_name opt/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
+		echo "debian/scopy/opt/scopy/lib/$lib_name"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
+	fi;
 done
 
 #libs="$(ldd ${TRAVIS_BUILD_DIR}/build/scopy | grep libpython | cut -d " " -f 3)"
@@ -92,7 +101,7 @@ echo "debian/scopy/opt/scopy/bin/decoders opt/scopy/bin/decoders" >> ${TRAVIS_BU
 echo "debian/scopy/opt/scopy/bin/qt.conf opt/scopy/bin/qt.conf" >> ${TRAVIS_BUILD_DIR}/debian/scopy.install
 echo "resources/*" >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
 echo "plugins/*" >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
-sudo chmod 755 ${TRAVIS_BUILD_DIR}/../libs/*
+sudo chmod -R 755 ${TRAVIS_BUILD_DIR}/../libs/*
 sudo chmod -R 755 ${TRAVIS_BUILD_DIR}/../plugins/*
 cp ${TRAVIS_BUILD_DIR}/build/scopy ${TRAVIS_BUILD_DIR}/../bin
 cp -R ${TRAVIS_BUILD_DIR}/build ${TRAVIS_BUILD_DIR}/../build
