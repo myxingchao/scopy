@@ -1,6 +1,5 @@
 #!/bin/sh
 
-#sudo add-apt-repository --yes ppa:jonathonf/python-3.6
 sudo rm /var/lib/dpkg/lock
 sudo dpkg --configure -a
 sudo add-apt-repository --yes ppa:beineri/opt-qt592-xenial
@@ -12,12 +11,6 @@ sudo apt-get install -y --force-yes qt59base qt59declarative qt59quickcontrols q
 
 source /opt/qt59/bin/qt59-env.sh && qmllint client/qml/*.qml
 cd ${WORKDIR}
-
-#sudo mv /usr/bin/python3 /usr/bin/python3-old
-#sudo ln -s /usr/bin/python3.6 /usr/bin/python3
-#sudo ln -s /usr/bin/python3.6m /usr/bin/python3m
-#sudo ln -s /usr/bin/python3.6m-config /usr/bin/python3m-config
-#sudo sed -i "s/4/6/g" /usr/lib/x86_64-linux-gnu/pkgconfig/python3.pc
 
 mkdir -p ${TRAVIS_BUILD_DIR}/../deps
 cd ${TRAVIS_BUILD_DIR}/../deps

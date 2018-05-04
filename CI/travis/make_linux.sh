@@ -33,7 +33,7 @@ mkdir -p ${TRAVIS_BUILD_DIR}/../plugins/xcbglintegrations
 rm ${TRAVIS_BUILD_DIR}/debian/source/include-binaries
 rm ${TRAVIS_BUILD_DIR}/debian/scopy.install
 
-sudo cp -R /usr/lib/python3.5/encodings ${TRAVIS_BUILD_DIR}/../libs
+#sudo cp -R /usr/lib/python3.5/encodings ${TRAVIS_BUILD_DIR}/../libs
 sudo cp -R /opt/scopy/plugins/platforms/* ${TRAVIS_BUILD_DIR}/../plugins/platforms/
 sudo cp -R /opt/scopy/plugins/xcbglintegrations/* ${TRAVIS_BUILD_DIR}/../plugins/xcbglintegrations/
 
@@ -78,15 +78,15 @@ echo "$libs" | while read -r lib_path; do
 	echo "debian/scopy/opt/scopy/lib/$lib_name"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
 done
 
-libs="$(ldd ${TRAVIS_BUILD_DIR}/build/scopy | grep libpython | cut -d " " -f 3)"
-echo "$libs" | while read -r lib_path; do
-	echo $lib_path;
-	sudo cp $lib_path ${TRAVIS_BUILD_DIR}/../libs/
-
-	lib_name="$(echo $lib_path | rev | cut -d "/" -f 1 | rev)"
-	echo "debian/scopy/opt/scopy/lib/$lib_name opt/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
-	echo "debian/scopy/opt/scopy/lib/$lib_name"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
-done
+#libs="$(ldd ${TRAVIS_BUILD_DIR}/build/scopy | grep libpython | cut -d " " -f 3)"
+#echo "$libs" | while read -r lib_path; do
+#	echo $lib_path;
+#	sudo cp $lib_path ${TRAVIS_BUILD_DIR}/../libs/
+#
+#	lib_name="$(echo $lib_path | rev | cut -d "/" -f 1 | rev)"
+#	echo "debian/scopy/opt/scopy/lib/$lib_name opt/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
+#	echo "debian/scopy/opt/scopy/lib/$lib_name"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
+#done
 
 echo "debian/scopy/opt/scopy/bin/decoders opt/scopy/bin/decoders" >> ${TRAVIS_BUILD_DIR}/debian/scopy.install
 echo "debian/scopy/opt/scopy/bin/qt.conf opt/scopy/bin/qt.conf" >> ${TRAVIS_BUILD_DIR}/debian/scopy.install
