@@ -39,8 +39,7 @@ matrix:
         - EXTRA_SSH=-oHostKeyAlgorithms=+ssh-dss
     - compiler: gcc
       os: linux
-      dist: trusty
-      env: LDIST=-trusty
+      dist: xenial
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ${TRAVIS_BUILD_DIR}/CI/travis/before_install_darwin.sh ; fi

@@ -4,7 +4,7 @@ CURRENT=$(pwd)
 mkdir -p ${CURRENT}/debian/scopy/opt/scopy/bin
 mkdir -p ${CURRENT}/debian/scopy/opt/scopy/lib
 echo "=============================================="
-cp ${CURRENT}/../libs/* debian/scopy/opt/scopy/lib/
+cp -R ${CURRENT}/../libs/* debian/scopy/opt/scopy/lib/
 cp ${CURRENT}/../bin/scopy debian/scopy/opt/scopy/bin/
 cp -R ${CURRENT}/../qt.conf debian/scopy/opt/scopy/bin/
 cp -R ${CURRENT}/resources/decoders debian/scopy/opt/scopy/bin/

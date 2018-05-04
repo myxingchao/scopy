@@ -33,6 +33,7 @@ mkdir -p ${TRAVIS_BUILD_DIR}/../plugins/xcbglintegrations
 rm ${TRAVIS_BUILD_DIR}/debian/source/include-binaries
 rm ${TRAVIS_BUILD_DIR}/debian/scopy.install
 
+sudo cp -R /usr/lib/python3.5/encodings ${TRAVIS_BUILD_DIR}/../libs
 sudo cp -R /opt/scopy/plugins/platforms/* ${TRAVIS_BUILD_DIR}/../plugins/platforms/
 sudo cp -R /opt/scopy/plugins/xcbglintegrations/* ${TRAVIS_BUILD_DIR}/../plugins/xcbglintegrations/
 

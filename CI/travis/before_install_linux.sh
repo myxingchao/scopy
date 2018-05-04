@@ -1,20 +1,23 @@
 #!/bin/sh
 
-sudo add-apt-repository --yes ppa:jonathonf/python-3.6
-sudo add-apt-repository --yes ppa:beineri/opt-qt592-trusty
+#sudo add-apt-repository --yes ppa:jonathonf/python-3.6
+sudo rm /var/lib/dpkg/lock
+sudo dpkg --configure -a
+sudo add-apt-repository --yes ppa:beineri/opt-qt592-xenial
 sudo apt-get -qq update
-sudo apt-get install -y git cmake libzip-dev libusb-1.0-0-dev autoconf libtool libxml2 libxml2-dev python3.6 python-dev python3.6-dev libfftw3-dev libffi-dev
+sudo apt-get install -y git cmake libzip-dev libusb-1.0-0-dev autoconf libtool libxml2 libxml2-dev python3 python-dev python3-dev libfftw3-dev libffi-dev
+sudo apt-get install python-cheetah python-markdown
 sudo apt-get install -y libmount-dev libpcre3-dev libglib2.0-dev libsigc++-2.0-dev libglibmm-2.4-dev doxygen libglu1-mesa-dev curl flex bison libmatio2 libmatio-dev libavahi-client-dev libavahi-common-dev
 sudo apt-get install -y --force-yes qt59base qt59declarative qt59quickcontrols qt59svg qt59tools
 
 source /opt/qt59/bin/qt59-env.sh && qmllint client/qml/*.qml
 cd ${WORKDIR}
 
-sudo mv /usr/bin/python3 /usr/bin/python3-old
-sudo ln -s /usr/bin/python3.6 /usr/bin/python3
-sudo ln -s /usr/bin/python3.6m /usr/bin/python3m
-sudo ln -s /usr/bin/python3.6m-config /usr/bin/python3m-config
-sudo sed -i "s/4/6/g" /usr/lib/x86_64-linux-gnu/pkgconfig/python3.pc
+#sudo mv /usr/bin/python3 /usr/bin/python3-old
+#sudo ln -s /usr/bin/python3.6 /usr/bin/python3
+#sudo ln -s /usr/bin/python3.6m /usr/bin/python3m
+#sudo ln -s /usr/bin/python3.6m-config /usr/bin/python3m-config
+#sudo sed -i "s/4/6/g" /usr/lib/x86_64-linux-gnu/pkgconfig/python3.pc
 
 mkdir -p ${TRAVIS_BUILD_DIR}/../deps
 cd ${TRAVIS_BUILD_DIR}/../deps
@@ -37,30 +40,6 @@ else
   cd boost_1_63_0
 fi
 sudo ./b2 link=static --prefix=${INSTALLED_DEPS} install >/dev/null
-
-cd ${WORKDIR}
-rm Markdown-2.6.8.tar.gz*
-if [ ! -d Markdown-2.6.8 ]; then
-  wget https://pypi.python.org/packages/1d/25/3f6d2cb31ec42ca5bd3bfbea99b63892b735d76e26f20dd2dcc34ffe4f0d/Markdown-2.6.8.tar.gz
-  tar -xzf Markdown-2.6.8.tar.gz
-  cd Markdown-2.6.8
-  ./setup.py build >/dev/null
-else
-  cd Markdown-2.6.8
-fi
-sudo ./setup.py install
-
-cd ${WORKDIR}
-rm Cheetah-2.4.4.tar.gz*
-if [ ! -d Cheetah-2.4.4 ]; then
-  wget https://pypi.python.org/packages/cd/b0/c2d700252fc251e91c08639ff41a8a5203b627f4e0a2ae18a6b662ab32ea/Cheetah-2.4.4.tar.gz
-  tar -xzf Cheetah-2.4.4.tar.gz
-  cd Cheetah-2.4.4
-  ./setup.py build >/dev/null
-else
-  cd Cheetah-2.4.4
-fi
-sudo ./setup.py install
 
 cd ${WORKDIR}
 rm volk-1.3.tar.gz*
