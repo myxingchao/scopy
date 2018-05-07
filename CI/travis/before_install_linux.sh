@@ -17,8 +17,8 @@ mkdir -p ${TRAVIS_BUILD_DIR}/../deps
 cd ${TRAVIS_BUILD_DIR}/../deps
 WORKDIR=$PWD
 cd ..
-mkdir -p ${TRAVIS_BUILD_DIR}/../static-deps/usr
-cd ${TRAVIS_BUILD_DIR}/../static-deps/usr
+mkdir -p /opt/scopy
+cd /opt/scopy
 INSTALLED_DEPS=$PWD
 echo $INSTALLED_DEPS
 
