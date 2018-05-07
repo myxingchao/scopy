@@ -218,9 +218,5 @@ else
 fi
 sudo make install
 
-#sudo rm ${INSTALLED_DEPS}/lib/*.so*
 ls ${INSTALLED_DEPS}/lib
-#sudo mkdir -p /opt/scopy
-#sudo cp -R /opt/qt59/* /opt/scopy
-#sudo cp /usr/local/lib/libsigrok*.so* /opt/scopy/lib
 echo $INSTALLED_DEPS

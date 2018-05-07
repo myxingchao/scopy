@@ -11,14 +11,8 @@ else
 fi
 
 sudo cp -R /opt/qt59/* /opt/scopy
-#sudo cp /usr/local/lib/libsigrok*.so* /opt/scopy/lib
 mkdir -p ${TRAVIS_BUILD_DIR}/build
 cd ${TRAVIS_BUILD_DIR}/build
-
-#if [ "$TRAVIS_BUILD" = true ]
-#then
-#	sudo apt-get remove --auto-remove python3.4
-#fi
 
 rm -rf ${TRAVIS_BUILD_DIR}/debian/scopy
 cd ${TRAVIS_BUILD_DIR}/build
@@ -46,15 +40,15 @@ echo "debian/scopy/opt/scopy/lib/libQt5XcbQpa.so.5"  >> ${TRAVIS_BUILD_DIR}/debi
 echo "debian/scopy/opt/scopy/lib/libQt5DBus.so.5 opt/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
 echo "debian/scopy/opt/scopy/lib/libQt5DBus.so.5"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
 
-libs="$(ldd ${TRAVIS_BUILD_DIR}/build/scopy | grep Qt | cut -d " " -f 3)"
-echo "$libs" | while read -r lib_path; do
-	echo $lib_path;
-	sudo cp $lib_path ${TRAVIS_BUILD_DIR}/../libs/
-
-	lib_name="$(echo $lib_path | rev | cut -d "/" -f 1 | rev)"
-	echo "debian/scopy/opt/scopy/lib/$lib_name opt/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
-	echo "debian/scopy/opt/scopy/lib/$lib_name"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
-done
+#libs="$(ldd ${TRAVIS_BUILD_DIR}/build/scopy | grep Qt | cut -d " " -f 3)"
+#echo "$libs" | while read -r lib_path; do
+#	echo $lib_path;
+#	sudo cp $lib_path ${TRAVIS_BUILD_DIR}/../libs/
+#
+#	lib_name="$(echo $lib_path | rev | cut -d "/" -f 1 | rev)"
+#	echo "debian/scopy/opt/scopy/lib/$lib_name opt/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
+#	echo "debian/scopy/opt/scopy/lib/$lib_name"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
+#done
 
 libs="$(ldd ${TRAVIS_BUILD_DIR}/build/scopy | grep libicu | cut -d " " -f 3)"
 echo "$libs" | while read -r lib_path; do
@@ -98,4 +92,4 @@ cd ${TRAVIS_BUILD_DIR}
 debuild -us -uc
 
 curl --upload-file ${TRAVIS_BUILD_DIR}/../scopy_*.deb https://transfer.sh/scopy_1.0.deb
-#dpkg-buildpackage -us -uc
+curl --upload-file ${TRAVIS_BUILD_DIR}/../scopy_1.0.orig.tar.gz https://transfer.sh/scopy_1.0.orig.tar.gz
