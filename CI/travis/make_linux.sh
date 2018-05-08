@@ -23,11 +23,15 @@ mkdir -p ${TRAVIS_BUILD_DIR}/../libs
 mkdir -p ${TRAVIS_BUILD_DIR}/../bin
 mkdir -p ${TRAVIS_BUILD_DIR}/../plugins/platforms
 mkdir -p ${TRAVIS_BUILD_DIR}/../plugins/xcbglintegrations
+mkdir -p ${TRAVIS_BUILD_DIR}/../plugins/imageformats
+mkdir -p ${TRAVIS_BUILD_DIR}/../plugins/iconengines
 rm ${TRAVIS_BUILD_DIR}/debian/source/include-binaries
 rm ${TRAVIS_BUILD_DIR}/debian/scopy.install
 
 sudo cp -R /opt/scopy/plugins/platforms/* ${TRAVIS_BUILD_DIR}/../plugins/platforms/
 sudo cp -R /opt/scopy/plugins/xcbglintegrations/* ${TRAVIS_BUILD_DIR}/../plugins/xcbglintegrations/
+sudo cp -R /opt/scopy/plugins/imageformats/* ${TRAVIS_BUILD_DIR}/../plugins/imageformats/
+sudo cp -R /opt/scopy/plugins/iconengines/* ${TRAVIS_BUILD_DIR}/../plugins/iconengines/
 
 echo "[Paths]" > ${TRAVIS_BUILD_DIR}/../qt.conf
 echo "Prefix = ../lib" >> ${TRAVIS_BUILD_DIR}/../qt.conf
