@@ -1,1 +1,2 @@
 debian/scopy/opt/scopy/bin/scopy opt/scopy/bin/
+debian/53-adi-m2k-usb.rules lib/udev/rules.d

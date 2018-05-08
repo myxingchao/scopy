@@ -75,6 +75,7 @@ do
 	fi;
 done
 
+echo "debian/53-adi-m2k-usb.rules lib/udev/rules.d" >> ${TRAVIS_BUILD_DIR}/debian/scopy.install
 echo "debian/scopy/opt/scopy/bin/decoders opt/scopy/bin/decoders" >> ${TRAVIS_BUILD_DIR}/debian/scopy.install
 echo "debian/scopy/opt/scopy/bin/qt.conf opt/scopy/bin/qt.conf" >> ${TRAVIS_BUILD_DIR}/debian/scopy.install
 echo "resources/*" >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
