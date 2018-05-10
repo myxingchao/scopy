@@ -1,1 +1,1 @@
-debian/53-adi-m2k-usb.rules /lib/udev/rules.d
+debian/53-adi-m2k-usb.rules lib/udev/rules.d

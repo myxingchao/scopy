@@ -1,24 +1,23 @@
 #!/bin/sh
 
-sudo rm /var/lib/dpkg/lock
-sudo dpkg --configure -a
 sudo add-apt-repository --yes ppa:beineri/opt-qt592-xenial
 sudo apt-get -qq update
+
+sudo rm /var/lib/dpkg/lock
+sudo dpkg --configure -a
 sudo apt-get install -y git cmake libzip-dev libusb-1.0-0-dev autoconf libtool libxml2 libxml2-dev python3 python-dev python3-dev libfftw3-dev libffi-dev
-sudo apt-get install python-cheetah python-markdown
+sudo apt-get install -y python-cheetah python-markdown
 sudo apt-get install -y libmount-dev libpcre3-dev libglib2.0-dev libsigc++-2.0-dev libglibmm-2.4-dev doxygen libglu1-mesa-dev curl flex bison libmatio2 libmatio-dev libavahi-client-dev libavahi-common-dev
 sudo apt-get install -y --force-yes qt59base qt59declarative qt59quickcontrols qt59svg qt59tools
 
-sudo mkdir -p /opt/scopy
+sudo mkdir -p /usr/local/scopy
 source /opt/qt59/bin/qt59-env.sh && qmllint client/qml/*.qml
 cd ${WORKDIR}
 
 mkdir -p ${TRAVIS_BUILD_DIR}/../deps
 cd ${TRAVIS_BUILD_DIR}/../deps
 WORKDIR=$PWD
-cd ..
-mkdir -p /opt/scopy
-cd /opt/scopy
+cd /usr/local/scopy
 INSTALLED_DEPS=$PWD
 echo $INSTALLED_DEPS
 
@@ -35,7 +34,6 @@ echo $INSTALLED_DEPS
 #fi
 #sudo ./b2 link=static --prefix=${INSTALLED_DEPS} install >/dev/null
 cd ${WORKDIR}
-rm boost_1_63_0.tar.gz*
 if [ ! -d boost_1_63_0 ]; then
   wget https://netcologne.dl.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.gz
   tar -xzf boost_1_63_0.tar.gz
@@ -62,7 +60,6 @@ sudo ./b2 --prefix=${INSTALLED_DEPS} install >/dev/null
 #sudo make install
 
 cd ${WORKDIR}
-rm volk-1.3.tar.gz*
 if [ ! -d volk-1.3 ]; then
   wget http://libvolk.org/releases/volk-1.3.tar.gz
   tar -xzf volk-1.3.tar.gz
@@ -111,7 +108,7 @@ sudo make install >/dev/null
 
 cd ${WORKDIR}
 if [ ! -d libsigrok ]; then
-  git clone https://github.com/sschnelle/libsigrok/
+  git clone https://github.com/sigrokproject/libsigrok/
   cd libsigrok
   ./autogen.sh
   ./configure --prefix=${INSTALLED_DEPS} --disable-all-drivers --enable-bindings --enable-cxx

@@ -6,53 +6,39 @@ then
 	TRAVIS_BUILD_DIR=$1
 	INSTALLED_DEPS=$2
 else
-	INSTALLED_DEPS=/opt/scopy
+	INSTALLED_DEPS=/usr/local/scopy
 	TRAVIS_BUILD=true
 fi
 
-sudo cp -R /opt/qt59/* /opt/scopy
+sudo cp -R /opt/qt59/* /usr/local/scopy
 mkdir -p ${TRAVIS_BUILD_DIR}/build
 cd ${TRAVIS_BUILD_DIR}/build
 
 rm -rf ${TRAVIS_BUILD_DIR}/debian/scopy
 cd ${TRAVIS_BUILD_DIR}/build
-cmake -DENABLE_STATIC_LINKING=ON -DCMAKE_FIND_LIBRARY_SUFFIXES=".a" -DCMAKE_PREFIX_PATH="/opt/scopy/lib/cmake;$INSTALLED_DEPS" -DCMAKE_INSTALL_PREFIX=$INSTALLED_DEPS ..
+cmake -DENABLE_STATIC_LINKING=ON -DCMAKE_FIND_LIBRARY_SUFFIXES=".a" -DCMAKE_PREFIX_PATH="/usr/local/scopy/lib/cmake;$INSTALLED_DEPS" -DCMAKE_INSTALL_PREFIX=$INSTALLED_DEPS ..
 make
 
-mkdir -p ${TRAVIS_BUILD_DIR}/../libs
-mkdir -p ${TRAVIS_BUILD_DIR}/../bin
-mkdir -p ${TRAVIS_BUILD_DIR}/../plugins/platforms
-mkdir -p ${TRAVIS_BUILD_DIR}/../plugins/xcbglintegrations
-mkdir -p ${TRAVIS_BUILD_DIR}/../plugins/imageformats
+mkdir -p ${TRAVIS_BUILD_DIR}/../libs ${TRAVIS_BUILD_DIR}/../bin ${TRAVIS_BUILD_DIR}/../plugins/platforms ${TRAVIS_BUILD_DIR}/../plugins/xcbglintegrations ${TRAVIS_BUILD_DIR}/../plugins/imageformats
 mkdir -p ${TRAVIS_BUILD_DIR}/../plugins/iconengines
 rm ${TRAVIS_BUILD_DIR}/debian/source/include-binaries
 rm ${TRAVIS_BUILD_DIR}/debian/scopy.install
 
-sudo cp -R /opt/scopy/plugins/platforms/* ${TRAVIS_BUILD_DIR}/../plugins/platforms/
-sudo cp -R /opt/scopy/plugins/xcbglintegrations/* ${TRAVIS_BUILD_DIR}/../plugins/xcbglintegrations/
-sudo cp -R /opt/scopy/plugins/imageformats/* ${TRAVIS_BUILD_DIR}/../plugins/imageformats/
-sudo cp -R /opt/scopy/plugins/iconengines/* ${TRAVIS_BUILD_DIR}/../plugins/iconengines/
+sudo cp -R /usr/local/scopy/plugins/platforms/* ${TRAVIS_BUILD_DIR}/../plugins/platforms/
+sudo cp -R /usr/local/scopy/plugins/xcbglintegrations/* ${TRAVIS_BUILD_DIR}/../plugins/xcbglintegrations/
+sudo cp -R /usr/local/scopy/plugins/imageformats/* ${TRAVIS_BUILD_DIR}/../plugins/imageformats/
+sudo cp -R /usr/local/scopy/plugins/iconengines/* ${TRAVIS_BUILD_DIR}/../plugins/iconengines/
 
 echo "[Paths]" > ${TRAVIS_BUILD_DIR}/../qt.conf
 echo "Prefix = ../lib" >> ${TRAVIS_BUILD_DIR}/../qt.conf
 echo "Plugins = ../plugins" >> ${TRAVIS_BUILD_DIR}/../qt.conf
 
-sudo cp /opt/scopy/lib/libQt5XcbQpa.so.5 ${TRAVIS_BUILD_DIR}/../libs/
-sudo cp /opt/scopy/lib/libQt5DBus.so.5 ${TRAVIS_BUILD_DIR}/../libs/
-echo "debian/scopy/opt/scopy/lib/libQt5XcbQpa.so.5 opt/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
-echo "debian/scopy/opt/scopy/lib/libQt5XcbQpa.so.5"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
-echo "debian/scopy/opt/scopy/lib/libQt5DBus.so.5 opt/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
-echo "debian/scopy/opt/scopy/lib/libQt5DBus.so.5"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
-
-#libs="$(ldd ${TRAVIS_BUILD_DIR}/build/scopy | grep Qt | cut -d " " -f 3)"
-#echo "$libs" | while read -r lib_path; do
-#	echo $lib_path;
-#	sudo cp $lib_path ${TRAVIS_BUILD_DIR}/../libs/
-#
-#	lib_name="$(echo $lib_path | rev | cut -d "/" -f 1 | rev)"
-#	echo "debian/scopy/opt/scopy/lib/$lib_name opt/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
-#	echo "debian/scopy/opt/scopy/lib/$lib_name"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
-#done
+#sudo cp /usr/local/scopy/lib/libQt5XcbQpa.so.5 ${TRAVIS_BUILD_DIR}/../libs/
+#sudo cp /usr/local/scopy/lib/libQt5DBus.so.5 ${TRAVIS_BUILD_DIR}/../libs/
+#echo "debian/scopy/usr/local/scopy/lib/libQt5XcbQpa.so.5 usr/local/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
+#echo "debian/scopy/usr/local/scopy/lib/libQt5XcbQpa.so.5"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
+#echo "debian/scopy/usr/local/scopy/lib/libQt5DBus.so.5 usr/local/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
+#echo "debian/scopy/usr/local/scopy/lib/libQt5DBus.so.5"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
 
 libs="$(ldd ${TRAVIS_BUILD_DIR}/build/scopy | grep libicu | cut -d " " -f 3)"
 echo "$libs" | while read -r lib_path; do
@@ -60,24 +46,24 @@ echo "$libs" | while read -r lib_path; do
 	sudo cp $lib_path ${TRAVIS_BUILD_DIR}/../libs/
 
 	lib_name="$(echo $lib_path | rev | cut -d "/" -f 1 | rev)"
-	echo "debian/scopy/opt/scopy/lib/$lib_name opt/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
-	echo "debian/scopy/opt/scopy/lib/$lib_name"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
+	echo "debian/scopy/usr/local/scopy/lib/$lib_name usr/local/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
+	echo "debian/scopy/usr/local/scopy/lib/$lib_name"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
 done
 
-sudo cp -R /opt/scopy/lib/*.so* ${TRAVIS_BUILD_DIR}/../libs/
-for ent in /opt/scopy/lib/*.so*
+sudo cp -R /usr/local/scopy/lib/*.so* ${TRAVIS_BUILD_DIR}/../libs/
+for ent in /usr/local/scopy/lib/*.so*
 do 
 	if [ -f $ent ]; then
 		lib_name="$(echo $ent | rev | cut -d "/" -f 1 | rev)"
 		echo "lib name " $lib_name "\n"
-		echo "debian/scopy/opt/scopy/lib/$lib_name opt/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
-		echo "debian/scopy/opt/scopy/lib/$lib_name"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
+		echo "debian/scopy/usr/local/scopy/lib/$lib_name usr/local/scopy/lib/"  >> ${TRAVIS_BUILD_DIR}/debian/scopy.install;
+		echo "debian/scopy/usr/local/scopy/lib/$lib_name"  >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
 	fi;
 done
 
-echo "debian/53-adi-m2k-usb.rules lib/udev/rules.d" >> ${TRAVIS_BUILD_DIR}/debian/scopy.install
-echo "debian/scopy/opt/scopy/bin/decoders opt/scopy/bin/decoders" >> ${TRAVIS_BUILD_DIR}/debian/scopy.install
-echo "debian/scopy/opt/scopy/bin/qt.conf opt/scopy/bin/qt.conf" >> ${TRAVIS_BUILD_DIR}/debian/scopy.install
+echo "debian/53-adi-m2k-usb.rules lib/udev/rules.d/53-adi-m2k-usb.rules" >> ${TRAVIS_BUILD_DIR}/debian/scopy.install
+echo "debian/scopy/usr/local/scopy/bin/decoders usr/local/scopy/bin/decoders" >> ${TRAVIS_BUILD_DIR}/debian/scopy.install
+echo "debian/scopy/usr/local/scopy/bin/qt.conf usr/local/scopy/bin/qt.conf" >> ${TRAVIS_BUILD_DIR}/debian/scopy.install
 echo "resources/*" >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
 echo "plugins/*" >> ${TRAVIS_BUILD_DIR}/debian/source/include-binaries;
 sudo chmod -R 755 ${TRAVIS_BUILD_DIR}/../libs/*
@@ -89,10 +75,10 @@ rm -rf ${TRAVIS_BUILD_DIR}/build
 cd ${TRAVIS_BUILD_DIR}/..
 sudo apt-get install -y devscripts debhelper
 rm scopy_1.0.orig.tar.gz
-mkdir -p ${TRAVIS_BUILD_DIR}/debian/scopy/opt/scopy/bin
-mkdir -p ${TRAVIS_BUILD_DIR}/debian/scopy/opt/scopy/lib
+mkdir -p ${TRAVIS_BUILD_DIR}/debian/scopy/usr/local/scopy/bin
+mkdir -p ${TRAVIS_BUILD_DIR}/debian/scopy/usr/local/scopy/lib
 tar -zcf scopy_1.0.orig.tar.gz scopy
-sudo rm -rf /opt/scopy
+sudo rm -rf /usr/local/scopy
 cd ${TRAVIS_BUILD_DIR}
 debuild -us -uc
 

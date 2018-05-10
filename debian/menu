@@ -1,0 +1,2 @@
+?package(scopy):needs="X11" section="Applications/Science/Electronics"\
+  title="scopy" command="/usr/local/scopy/bin/scopy"
