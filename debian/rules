@@ -1,24 +1,28 @@
 #!/usr/bin/make -f
 export QT_SELECT=5
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
-export LD_LIBRARY_PATH := /usr/local/scopy/lib:$(LD_LIBRARY_PATH)
+#export LD_LIBRARY_PATH := /usr/local/scopy/lib:$(LD_LIBRARY_PATH)
 
 %:
 	dh $@ --parallel
 
 override_dh_auto_configure:
-	pwd
-	echo "Running cmake"
-
-override_dh_auto_build:
-	echo "Building"
-
-override_dh_auto_install:
+	dh_auto_configure -- -DENABLE_STATIC_LINKING=ON -DCMAKE_FIND_LIBRARY_SUFFIXES=".a" -DCMAKE_PREFIX_PATH="/usr/local/scopy/lib/cmake;/usr/local/scopy" -DCMAKE_INSTALL_PREFIX=/usr/local/scopy
 	chmod 755 debian/build.sh
 	./debian/build.sh
 
-override_dh_install:
-	ls -R -la debian
+	#pwd
+	#echo "Running cmake"
+
+#override_dh_auto_build:
+#	echo "Building"
+
+#override_dh_auto_install:
+#	chmod 755 debian/build.sh
+#	./debian/build.sh
+
+#override_dh_install:
+#	ls -R -la debian
 
 override_dh_shlibdeps:
 	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info

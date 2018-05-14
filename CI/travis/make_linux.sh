@@ -16,7 +16,7 @@ cd ${TRAVIS_BUILD_DIR}/build
 
 rm -rf ${TRAVIS_BUILD_DIR}/debian/scopy
 cd ${TRAVIS_BUILD_DIR}/build
-cmake -DENABLE_STATIC_LINKING=ON -DCMAKE_FIND_LIBRARY_SUFFIXES=".a" -DCMAKE_PREFIX_PATH="/usr/local/scopy/lib/cmake;$INSTALLED_DEPS" -DCMAKE_INSTALL_PREFIX=$INSTALLED_DEPS ..
+cmake -DENABLE_STATIC_LINKING=ON -DCMAKE_FIND_LIBRARY_SUFFIXES=".a" -DCMAKE_PREFIX_PATH="/usr/local/scopy/lib/cmake;$INSTALLED_DEPS" ..
 make
 
 mkdir -p ${TRAVIS_BUILD_DIR}/../libs ${TRAVIS_BUILD_DIR}/../bin ${TRAVIS_BUILD_DIR}/../plugins/platforms ${TRAVIS_BUILD_DIR}/../plugins/xcbglintegrations ${TRAVIS_BUILD_DIR}/../plugins/imageformats
