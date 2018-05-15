@@ -10,14 +10,14 @@ sudo apt-get install -y python-cheetah python-markdown
 sudo apt-get install -y libmount-dev libpcre3-dev libglib2.0-dev libsigc++-2.0-dev libglibmm-2.4-dev doxygen libglu1-mesa-dev curl flex bison libmatio2 libmatio-dev libavahi-client-dev libavahi-common-dev
 sudo apt-get install -y --force-yes qt59base qt59declarative qt59quickcontrols qt59svg qt59tools
 
-sudo mkdir -p /usr/local/scopy
+sudo mkdir -p /opt/scopy
 source /opt/qt59/bin/qt59-env.sh && qmllint client/qml/*.qml
 cd ${WORKDIR}
 
 mkdir -p ${TRAVIS_BUILD_DIR}/../deps
 cd ${TRAVIS_BUILD_DIR}/../deps
 WORKDIR=$PWD
-cd /usr/local/scopy
+cd /opt/scopy
 INSTALLED_DEPS=$PWD
 echo $INSTALLED_DEPS
 
