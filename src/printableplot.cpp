@@ -18,6 +18,10 @@
  */
 
 #include "printableplot.h"
+#include <QImage>
+#include <QFileDialog>
+#include "DisplayPlot.h"
+#include <qwt_scale_widget.h>
 
 using namespace adiscope;
 
@@ -42,8 +46,25 @@ void PrintablePlot::printPlot()
 
         updateLegend();
 
-        d_plotRenderer.exportTo(this,
-                                "capturePlot");
+        OscScaleDraw* sd = static_cast<OscScaleDraw*>(axisWidget(QwtPlot::xBottom)->scaleDraw());
+        sd->setColor(Qt::white);
+        sd->invalidateCache();
+
+        QString fileName = QFileDialog::getSaveFileName(this,
+                           tr("Save to"), "",
+                           tr({"(*.png);;"}));
+        QImage img(width(), height(), QImage::Format_RGBA8888);
+        img.fill(Qt::black);
+        QPainter painter(&img);
+        d_plotRenderer.render(this, &painter, QRectF(0, 0, width(), height()));
+
+        img.invertPixels(QImage::InvertRgb);
+
+        painter.end();
+        img.save(fileName, 0, -1);
+
+        sd->setColor(Qt::gray);
+        sd->invalidateCache();
 
         insertLegend(nullptr);
 }
