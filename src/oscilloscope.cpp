@@ -112,7 +112,9 @@ Oscilloscope::Oscilloscope(struct iio_context *ctx, Filter *filt,
 	nb_ref_channels(0),
 	lastFunctionValid(false),
 	import_error(""),
-	restartFlowCounter(NO_FLOW_BUFFERS)
+	restartFlowCounter(NO_FLOW_BUFFERS),
+	hCursorsEnabled(true),
+	vCursorsEnabled(true)
 {
 	ui->setupUi(this);
 	int triggers_panel = ui->stackedWidget->insertWidget(-1, &trigger_settings);
@@ -1134,6 +1136,8 @@ void Oscilloscope::cursor_panel_init()
 	connect(cr_ui->vCursorsEnable, SIGNAL(toggled(bool)),
 		cursor_readouts_ui->VoltageCursors,
 		SLOT(setVisible(bool)));
+	connect(cr_ui->btnNormalTrack, &QPushButton::toggled,
+		this, &Oscilloscope::toggleCursorsMode);
 
 	cr_ui->horizontalSlider->setMaximum(100);
 	cr_ui->horizontalSlider->setMinimum(0);
@@ -1148,6 +1152,26 @@ void Oscilloscope::cursor_panel_init()
 		[=](CustomPlotPositionButton::ReadoutsPosition position){
 		plot.moveCursorReadouts(position);
 	});
+}
+
+void Oscilloscope::toggleCursorsMode(bool toggled)
+{
+	cr_ui->hCursorsEnable->setVisible(toggled);
+	cr_ui->vCursorsEnable->setVisible(toggled);
+	if (toggled) {
+		cr_ui->hCursorsEnable->setChecked(hCursorsEnabled);
+		cr_ui->vCursorsEnable->setChecked(vCursorsEnabled);
+	} else {
+		hCursorsEnabled = cr_ui->hCursorsEnable->isChecked();
+		vCursorsEnabled = cr_ui->vCursorsEnable->isChecked();
+		cr_ui->hCursorsEnable->setChecked(true);
+		cr_ui->vCursorsEnable->setChecked(true);
+	}
+	cr_ui->label_2->setVisible(toggled);
+	cr_ui->line_2->setVisible(toggled);
+	cr_ui->label_3->setVisible(toggled);
+	cr_ui->line_3->setVisible(toggled);
+	plot.trackModeEnabled(toggled);
 }
 
 void Oscilloscope::pause(bool paused)
@@ -1847,6 +1871,7 @@ void Oscilloscope::toggle_blockchain_flow(bool en)
 
 void Oscilloscope::runStopToggled(bool checked)
 {
+
 	QPushButton *btn = static_cast<QPushButton *>(QObject::sender());
 	setDynamicProperty(btn, "running", checked);
 
@@ -3605,6 +3630,8 @@ void Oscilloscope::singleCaptureDone()
 			Q_EMIT isRunning(false);
 		}
 	}
+
+	plot.repositionCursors();
 
 	if(restartFlowCounter == 0) {
 		restartFlowCounter = NO_FLOW_BUFFERS;
