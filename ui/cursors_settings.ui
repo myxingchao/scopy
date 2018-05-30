@@ -335,6 +335,19 @@ color: rgba(255,255,255,51);
          </property>
         </spacer>
        </item>
+       <item>
+        <widget class="adiscope::SmallOnOffSwitch" name="btnLockHorizontal">
+         <property name="styleSheet">
+          <string notr="true">QPushButton[use_icon=true]</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
     </layout>
@@ -451,6 +464,19 @@ color: rgba(255,255,255,51);
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="adiscope::SmallOnOffSwitch" name="btnLockVertical">
+         <property name="styleSheet">
+          <string notr="true">QPushButton[use_icon=true]</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
@@ -704,6 +730,11 @@ QSlider::sub-page:horizontal {
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>adiscope::SmallOnOffSwitch</class>
+   <extends>QPushButton</extends>
+   <header>smallOnOffSwitch.hpp</header>
+  </customwidget>
   <customwidget>
    <class>adiscope::CustomSwitch</class>
    <extends>QPushButton</extends>

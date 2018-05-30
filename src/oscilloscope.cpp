@@ -1122,7 +1122,15 @@ void Oscilloscope::cursor_panel_init()
 {
 	cr_ui = new Ui::CursorsSettings;
 	cr_ui->setupUi(ui->cursorsSettings);
+	setDynamicProperty(cr_ui->btnLockHorizontal, "use_icon", true);
+	setDynamicProperty(cr_ui->btnLockVertical, "use_icon", true);
 	//cr_ui->posSelect->setStyleSheet("background-color:red;");
+
+	connect(cr_ui->btnLockHorizontal, &QPushButton::toggled,
+		&plot, &CapturePlot::setHorizCursorsLocked);
+	connect(cr_ui->btnLockVertical, &QPushButton::toggled,
+		&plot, &CapturePlot::setVertCursorsLocked);
+
 	cursorsPositionButton = new CustomPlotPositionButton(cr_ui->posSelect);
 
 	connect(cr_ui->hCursorsEnable, SIGNAL(toggled(bool)),
@@ -1156,21 +1164,30 @@ void Oscilloscope::cursor_panel_init()
 
 void Oscilloscope::toggleCursorsMode(bool toggled)
 {
-	cr_ui->hCursorsEnable->setVisible(toggled);
-	cr_ui->vCursorsEnable->setVisible(toggled);
+	cr_ui->hCursorsEnable->setEnabled(toggled);
+	cr_ui->vCursorsEnable->setEnabled(toggled);
 	if (toggled) {
+		plot.setVertCursorsEnabled(hCursorsEnabled);
+		plot.setHorizCursorsEnabled(vCursorsEnabled);
+		cursor_readouts_ui->TimeCursors->setVisible(vCursorsEnabled);
+		cursor_readouts_ui->VoltageCursors->setVisible(hCursorsEnabled);/*
 		cr_ui->hCursorsEnable->setChecked(hCursorsEnabled);
-		cr_ui->vCursorsEnable->setChecked(vCursorsEnabled);
+		cr_ui->vCursorsEnable->setChecked(vCursorsEnabled);*/
 	} else {
 		hCursorsEnabled = cr_ui->hCursorsEnable->isChecked();
 		vCursorsEnabled = cr_ui->vCursorsEnable->isChecked();
-		cr_ui->hCursorsEnable->setChecked(true);
-		cr_ui->vCursorsEnable->setChecked(true);
+//		cr_ui->hCursorsEnable->setChecked(true);
+//		cr_ui->vCursorsEnable->setChecked(true);
+		plot.setVertCursorsEnabled(true);
+		plot.setHorizCursorsEnabled(true);
+		cursor_readouts_ui->TimeCursors->setVisible(true);
+		cursor_readouts_ui->VoltageCursors->setVisible(true);
 	}
-	cr_ui->label_2->setVisible(toggled);
-	cr_ui->line_2->setVisible(toggled);
-	cr_ui->label_3->setVisible(toggled);
-	cr_ui->line_3->setVisible(toggled);
+//	cr_ui->label_2->setVisible(toggled);
+//	cr_ui->line_2->setVisible(toggled);
+//	cr_ui->label_3->setVisible(toggled);
+//	cr_ui->line_3->setVisible(toggled);
+	cr_ui->btnLockVertical->setEnabled(toggled);
 	plot.trackModeEnabled(toggled);
 }
 
