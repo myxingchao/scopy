@@ -146,6 +146,9 @@ namespace adiscope {
 		void setTriggerState(int triggerState);
 		void setCursorReadoutsTransparency(int value);
 		void moveCursorReadouts(CustomPlotPositionButton::ReadoutsPosition position);
+		void setHorizCursorsLocked(bool value);
+		void setVertCursorsLocked(bool value);
+		void showEvent(QShowEvent *event);
 
 	protected:
 		virtual void cleanUpJustBeforeChannelRemoval(int chnIdx);
@@ -247,7 +250,12 @@ namespace adiscope {
 		bool d_trackMode;
 		QwtPlotMarker *markerIntersection1;
 		QwtPlotMarker *markerIntersection2;
-
+		bool horizCursorsLocked;
+		bool vertCursorsLocked;
+		int pixelPosHandleHoriz1;
+		int pixelPosHandleHoriz2;
+		int pixelPosHandleVert1;
+		int pixelPosHandleVert2;
 	};
 }
 

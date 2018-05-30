@@ -64,7 +64,9 @@ CapturePlot::CapturePlot(QWidget *parent,
 	d_labelsEnabled(false),
 	d_timeTriggerMinValue(-1),
 	d_timeTriggerMaxValue(1),
-	d_trackMode(false)
+	d_trackMode(false),
+	horizCursorsLocked(false),
+	vertCursorsLocked(false)
 {
 	setMinimumHeight(250);
 	setMinimumWidth(500);
@@ -318,10 +320,6 @@ CapturePlot::CapturePlot(QWidget *parent,
 	/* Set initial values for cursors */
 	double voltsPerDiv = VertUnitsPerDiv(activeVertAxis());
 	double secPerDiv = HorizUnitsPerDiv();
-	d_hBar1->setPosition(0 + voltsPerDiv);
-	d_hBar2->setPosition(0 - voltsPerDiv);
-	d_vBar1->setPosition(0 + secPerDiv);
-	d_vBar2->setPosition(0 - secPerDiv);
 
 	/* Update Cursor Readouts */
 	onVoltageCursor1Moved(d_hBar1->plotCoord().y());
@@ -333,14 +331,56 @@ CapturePlot::CapturePlot(QWidget *parent,
 	d_cursorTimeFormatter.setTwoDecimalMode(false);
 
 	/* When a handle position changes the bar follows */
-	connect(d_vCursorHandle1, SIGNAL(positionChanged(int)),
-		d_hBar1, SLOT(setPixelPosition(int)));
-	connect(d_vCursorHandle2, SIGNAL(positionChanged(int)),
-		d_hBar2, SLOT(setPixelPosition(int)));
-	connect(d_hCursorHandle1, SIGNAL(positionChanged(int)),
-		d_vBar1, SLOT(setPixelPosition(int)));
-	connect(d_hCursorHandle2, SIGNAL(positionChanged(int)),
-		d_vBar2, SLOT(setPixelPosition(int)));
+	connect(d_vCursorHandle1, &PlotLineHandleV::positionChanged,
+		[=](int value) {
+
+		if (vertCursorsLocked) {
+			int position2 = value - (pixelPosHandleVert1 - pixelPosHandleVert2);
+			pixelPosHandleVert2 = position2;
+			d_hBar2->setPixelPosition(position2);
+		}
+
+		pixelPosHandleVert1 = value;
+		d_hBar1->setPixelPosition(value);
+	});
+	connect(d_vCursorHandle2, &PlotLineHandleV::positionChanged,
+		[=](int value) {
+
+		if (vertCursorsLocked) {
+			int position1 = value + (pixelPosHandleVert1 - pixelPosHandleVert2);
+			pixelPosHandleVert1 = position1;
+			d_hBar1->setPixelPosition(position1);
+		}
+
+		pixelPosHandleVert2 = value;
+		d_hBar2->setPixelPosition(value);
+	});
+
+	connect(d_hCursorHandle1, &PlotLineHandleH::positionChanged,
+		[=](int value) {
+		if (horizCursorsLocked) {
+			int position2 = value - (pixelPosHandleHoriz1 - pixelPosHandleHoriz2);
+			pixelPosHandleHoriz2 = position2;
+			d_vBar2->setPixelPosition(position2);
+		}
+		pixelPosHandleHoriz1 = value;
+		d_vBar1->setPixelPosition(value);
+	});
+	connect(d_hCursorHandle2, &PlotLineHandleH::positionChanged,
+		[=](int value) {
+		if (horizCursorsLocked) {
+			int position1 = value + (pixelPosHandleHoriz1 - pixelPosHandleHoriz2);
+			pixelPosHandleHoriz1 = position1;
+			d_vBar1->setPixelPosition(position1);
+		}
+		pixelPosHandleHoriz2 = value;
+		d_vBar2->setPixelPosition(value);
+	});
+
+	d_hBar1->setPosition(0 + voltsPerDiv);
+	d_hBar2->setPosition(0 - voltsPerDiv);
+	d_vBar1->setPosition(0 + secPerDiv);
+	d_vBar2->setPosition(0 - secPerDiv);
 
 	/* When bar position changes due to plot resizes update the handle */
 	connect(d_hBar1, SIGNAL(pixelPositionChanged(int)),
@@ -701,6 +741,24 @@ void CapturePlot::onTriggerBHandleGrabbed(bool grabbed)
 	else
 		d_levelTriggerBBar->setPen(d_trigBinactiveLinePen);
 	d_symbolCtrl->updateOverlay();
+}
+
+void CapturePlot::setVertCursorsLocked(bool value)
+{
+	vertCursorsLocked = value;
+}
+
+void CapturePlot::showEvent(QShowEvent *event)
+{
+	d_vCursorHandle1->triggerMove();
+	d_vCursorHandle2->triggerMove();
+	d_hCursorHandle1->triggerMove();
+	d_hCursorHandle2->triggerMove();
+}
+
+void CapturePlot::setHorizCursorsLocked(bool value)
+{
+	horizCursorsLocked = value;
 }
 
 Measure* CapturePlot::measureOfChannel(int chnIdx) const
