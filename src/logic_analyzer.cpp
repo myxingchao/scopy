@@ -126,6 +126,7 @@ LogicAnalyzer::LogicAnalyzer(struct iio_context *ctx,
 {
 	ui->setupUi(this);
 	setDynamicProperty(ui->btnCursorsLock, "use_icon", true);
+	setDynamicProperty(ui->btnCursorsLock, "bothValid", true);
 
 	timer->setSingleShot(true);
 	this->setAttribute(Qt::WA_DeleteOnClose, true);

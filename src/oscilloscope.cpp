@@ -1123,7 +1123,9 @@ void Oscilloscope::cursor_panel_init()
 	cr_ui = new Ui::CursorsSettings;
 	cr_ui->setupUi(ui->cursorsSettings);
 	setDynamicProperty(cr_ui->btnLockHorizontal, "use_icon", true);
+	setDynamicProperty(cr_ui->btnLockHorizontal, "bothValid",true);
 	setDynamicProperty(cr_ui->btnLockVertical, "use_icon", true);
+	setDynamicProperty(cr_ui->btnLockVertical, "bothValid",true);
 	//cr_ui->posSelect->setStyleSheet("background-color:red;");
 
 	connect(cr_ui->btnLockHorizontal, &QPushButton::toggled,
