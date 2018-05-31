@@ -113,12 +113,15 @@ bool SmallOnOffSwitch::event(QEvent* e)
 		if(propName=="rightText" && property("rightText").isValid())
 			off.setText(property("rightText").toString());
 		if(propName=="bothValid" && property("bothValid").isValid())
+		{
 			bothValid = property("bothValid").toBool();
+			updateOnOffLabels();
+		}
 		if(propName=="duration" && property("duration").isValid())
 			setDuration(property("duration").toInt());
 
-
 	}
+
 	return QPushButton::event(e);
 }
 void SmallOnOffSwitch::paintEvent(QPaintEvent *e)
@@ -174,5 +177,10 @@ void SmallOnOffSwitch::updateOnOffLabels()
 	{
 		on.setEnabled(isChecked());
 		off.setEnabled(!isChecked());
+		setHandleColor(color_end);
+	}
+	else
+	{
+		setHandleColor(color_start);
 	}
 }
